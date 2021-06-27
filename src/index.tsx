@@ -1,13 +1,81 @@
-import * as React from 'react'
-import styles from './styles.module.css'
+import React, { createRef, useEffect, useState } from 'react'
+import { BoxComponent, CanvasData } from './Dtos/canvas.dtos';
+import './styles.scss'
+import { DestroyCanvas, InitCanvas } from './Utils/canvas.utils';
+import { log } from './Utils/common.utils';
 
 interface Props {
+    mode?: 'editor' | 'viewer';
+    defaultData?: CanvasData;
+    data?: CanvasData;
+    onDataChange?( data: CanvasData ): void;
 }
 
-export const CanvasWorkflow = ({ }: Props) => {
-    return (
-        <div className={`canvas-workflow`}>
+const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Props) => {
 
+    const [cwMode, setCwMode] = useState(mode);
+    const [cwData, setCwData] = useState<CanvasData | undefined>(data || defaultData);
+
+    const canvasRef = createRef<HTMLCanvasElement>();
+    const parentRef = createRef<HTMLDivElement>();
+
+    useEffect(() => {
+        setCwMode(mode);
+        setCwData(data);
+    }, [mode, data])
+
+    useEffect(() => {
+        if( canvasRef.current && parentRef.current ) {
+            InitCanvas({
+                parent: parentRef.current,
+                canvas: canvasRef.current,
+                mode: cwMode,
+                data: cwData,
+            });
+        }
+
+        return () => {
+            DestroyCanvas();
+        }
+    }, [canvasRef, parentRef, cwMode, cwData ])
+
+    const addRandomBox = () => {
+        const randomX = Math.floor( Math.random() * ( canvasRef.current?.width || 100 ) );
+        const randomY = Math.floor( Math.random() * ( canvasRef.current?.height || 100 ) );
+        const comp: BoxComponent = {
+            type: 'box',
+            x: randomX,
+            y: randomY,
+            w: 100,
+            h: 100,
+            fillColor: 'green',
+            text: 'Random ' + randomX + ':' + randomY
+        }
+        setCwData( { ...cwData, components: [ ...cwData?.components || [], comp ] })
+    }
+
+    const clearAll = () => {
+        setCwData( { ...cwData, components: [] } );
+        log(cwData);
+    }
+
+    return (
+        <div className={`canvas-workflow`} >
+            <div className='cw-tools'>
+                <div className=''>
+                    <div>BOX</div>
+                </div>
+            </div>
+            <div className='cw-wrapper' ref={parentRef}>
+                <canvas ref={canvasRef}></canvas>
+            </div>
+            <div className='cw-settings' onClick={()=>setCwMode('viewer')}>
+                <div>settings</div>
+                <button onClick={addRandomBox}>Add Random Box</button>
+                <button onClick={clearAll}>Clear All</button>
+            </div>
         </div>
     )
 }
+
+export default ConvasWorkflow;
