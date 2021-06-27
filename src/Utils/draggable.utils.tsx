@@ -15,11 +15,13 @@ export const RegisterDraggable = ( canvas: HTMLCanvasElement, components: Canvas
     cwRender = render;
 
     canvasDOM.addEventListener('mousedown', onMouseDown );
+    canvasDOM.addEventListener('mousemove', onMouseMove );
 }
 
 export const DestroyDraggable = () => {
     if( canvasDOM ) {
         canvasDOM.removeEventListener('mousedown', onMouseDown );
+        canvasDOM.removeEventListener('mousemove', onMouseMove );
     }
 }
 
@@ -37,7 +39,6 @@ const onMouseDown = ( event: MouseEvent ) => {
             offset.x = canvasEvent.x - comp.x;
             offset.y = canvasEvent.y - comp.y;
 
-            canvasDOM.addEventListener('mousemove', onMouseMove );
             canvasDOM.addEventListener('mouseup', onMouseUp );
             break;
         }
@@ -46,19 +47,29 @@ const onMouseDown = ( event: MouseEvent ) => {
 }
 
 const onMouseMove = ( event: MouseEvent ) => {
+    const canvasEvent = getCanvasEvent( event );
+    canvasDOM.style.cursor = 'default';
     if( dragCompIndex !== -1 ) {
-        const canvasEvent = getCanvasEvent( event );
-
         cwComponents[dragCompIndex].x = canvasEvent.x - offset.x;
         cwComponents[dragCompIndex].y = canvasEvent.y - offset.y;
         cwRender();
+
+        canvasDOM.style.cursor = 'move';
+    } else {
+        for( let comp of cwComponents ) {
+            if( comp.type === 'box' 
+                && rectCollision(canvasEvent.x, canvasEvent.y, comp as BoxComponent ) 
+            ) {
+                canvasDOM.style.cursor = 'move'; // On hover over draggable box.
+                break;
+            }
+        }
     }
 }
 
 const onMouseUp = () => {
     isDragging = false;
     dragCompIndex = -1;
-    canvasDOM.removeEventListener('mousemove', onMouseMove );
     canvasDOM.removeEventListener('mouseup', onMouseUp );
 }
 
