@@ -1,5 +1,6 @@
 import { BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
 import { debounce, log } from "./common.utils";
+import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
 
 let debug = process.env.NODE_ENV === 'development';
@@ -7,6 +8,7 @@ let debug = process.env.NODE_ENV === 'development';
 let parentDOM: HTMLDivElement;
 let canvasDOM: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D | null;
+let cwMode: 'editor' | 'viewer';
 
 let canvasDefaultData = {
     height: 500,
@@ -45,6 +47,7 @@ export const InitCanvas = (
 ) => {
     parentDOM = parent;
     canvasDOM = canvas;
+    cwMode = mode || 'editor';
 
     ctx = canvas.getContext("2d");
 
@@ -53,6 +56,9 @@ export const InitCanvas = (
     }
     
     canvasRender();
+    if( canvasData?.components?.length ) {
+        RegisterDraggable( canvasDOM, canvasData.components, canvasRender );
+    }
     window.addEventListener( 'resize', debouncRender );
 }
 
@@ -61,6 +67,7 @@ export const InitCanvas = (
  */
 export const DestroyCanvas = () => {
     window.removeEventListener( 'resize', debouncRender );
+    DestroyDraggable();
     if( debug ) {
         log('Canvas Destroyed');
     }
@@ -94,6 +101,7 @@ const canvasRender = ( ) => {
     
         if( debug ) {
             log('Rendering...');
+            log('Data:', {canvasData, canvasDefaultData} );
             TimeLogger.start();
         }
         
@@ -104,7 +112,7 @@ const canvasRender = ( ) => {
                 renderComponents(component);
             } );
         }
-    
+            
         if( debug ) {
             TimeLogger.stop('Render');
             log('Render Completed');
@@ -117,6 +125,8 @@ const canvasRender = ( ) => {
  */
 const setCanvasBG = () => {
     if( canvasDOM && ctx ) {
+        // ctx.imageSmoothingEnabled = true;
+        ctx.translate(0.5, 0.5);
         ctx.fillStyle = canvasData.background || canvasDefaultData.background;
         ctx.fillRect(0, 0, canvasDOM.width, canvasDOM.height);
     }
@@ -141,29 +151,42 @@ const renderComponents = ( component: CanvasComponent ) => {
  * @param component Canvas Component.
  */
 const processBaseComponent = ( component: CanvasComponent ) => {
+    // Register editor mode.
+    if( cwMode === 'editor' ) {
+        // Register draggable.
+        if( typeof component.draggable === 'undefined' || component.draggable ) {
 
+        }
+    }
 }
 
 const drawBoxComponent = ( component: BoxComponent ) => {
     if( ! ctx ) return;
 
+    // ctx.imageSmoothingEnabled = true;
+
     const padding = 5;
     const fontSize = component.fontSize || canvasDefaultData.fontSize;
 
+    ctx.save();
+    ctx.beginPath();
     if( component.fillColor ) {
         ctx.fillStyle = component.fillColor;
-        ctx.fillRect( component.x, component.y, component.w, component.h );
+        ctx.rect(component.x, component.y, component.w, component.h);
+        ctx.fill();
     }
 
     ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
     ctx.strokeStyle = component.strokeColor || canvasDefaultData.strokeColor;
-    ctx.strokeRect( component.x, component.y, component.w, component.h );
+    ctx.rect(component.x, component.y, component.w, component.h);
+    ctx.stroke();
+    ctx.clip();
 
     ctx.font = `${fontSize}px ${component.fontFamily}`;
     ctx.fillStyle = component.textColor || canvasDefaultData.strokeColor;
     ctx.fillText( 
         component.text, component.x + padding + ctx.lineWidth, 
         component.y + padding + fontSize + ctx.lineWidth - 5,
-        component.w - padding - ctx.lineWidth
     );
+    ctx.restore();
 }

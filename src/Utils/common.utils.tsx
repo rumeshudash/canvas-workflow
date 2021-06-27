@@ -18,6 +18,15 @@ export function debounce(func: Function, timeout = 300){
     };
 }
 
+export const reversedIndexOf = function( arr: any[], item: any){
+    const { length } = arr;
+    const index = arr.indexOf(item);
+    if(index === -1){
+       return -1;
+    };
+    return length - index - 1;
+};
+
 /**
  * Custom Log with tag.
  * 

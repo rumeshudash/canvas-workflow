@@ -63,7 +63,7 @@ const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Pr
         <div className={`canvas-workflow`} >
             <div className='cw-tools'>
                 <div className=''>
-                    <div>BOX</div>
+                    <div>Tool Box</div>
                 </div>
             </div>
             <div className='cw-wrapper' ref={parentRef}>

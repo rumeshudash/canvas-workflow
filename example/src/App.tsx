@@ -18,8 +18,8 @@ const App = () => {
                     w: 100, 
                     h: 100,
                     fillColor: 'red',
-                    strokeColor: 'yellow',
-                    lineWidth: 5,
+                    strokeColor: 'green',
+                    lineWidth: 1,
                 }
             ]
         })

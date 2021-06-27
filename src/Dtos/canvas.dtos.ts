@@ -9,15 +9,16 @@ export type CanvasComponent = BoxComponent | DiamondComponent;
 
 export interface BaseComponent {
     type: string;
-    paths?: { x: number, y: number }[];
+    // paths?: { x: number, y: number }[];
+    x: number;
+    y: number;
     fillColor?: string;
     lineWidth?: number;
     strokeColor?: string;
+    draggable?: boolean;
 }
 
 export interface BoxComponent extends BaseComponent {
-    x: number;
-    y: number;
     w: number;
     h: number;
     text: string;
