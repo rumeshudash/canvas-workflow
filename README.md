@@ -15,12 +15,12 @@ npm install --save canvas-workflow
 ```tsx
 import React, { Component } from 'react'
 
-import MyComponent from 'canvas-workflow'
+import CanvasWorkflow from 'canvas-workflow'
 import 'canvas-workflow/dist/index.css'
 
 class Example extends Component {
   render() {
-    return <MyComponent />
+    return <CanvasWorkflow />
   }
 }
 ```

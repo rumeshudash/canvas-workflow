@@ -21,6 +21,7 @@ let canvasDefaultData = {
 }
 
 let canvasData: CanvasData = {}
+let selectedIndex: number;
 
 interface InitCanvasProps {
     parent: HTMLDivElement,
@@ -56,10 +57,13 @@ export const InitCanvas = (
     }
     
     canvasRender();
-    if( canvasData?.components?.length ) {
+    if( cwMode === 'editor' && canvasData?.components?.length ) {
         RegisterDraggable( canvasDOM, canvasData.components, canvasRender );
+    } else {
+        DestroyDraggable();
     }
     window.addEventListener( 'resize', debouncRender );
+    canvasDOM.addEventListener( 'cwComponentSelected', handleComponentSelect );
 }
 
 /**
@@ -67,6 +71,7 @@ export const InitCanvas = (
  */
 export const DestroyCanvas = () => {
     window.removeEventListener( 'resize', debouncRender );
+    canvasDOM.removeEventListener( 'cwComponentSelected', handleComponentSelect );
     DestroyDraggable();
     if( debug ) {
         log('Canvas Destroyed');
@@ -79,8 +84,16 @@ export const DestroyCanvas = () => {
 export const ClearCanvas = () => {
     if( canvasDOM && ctx ) {
         ctx.clearRect(0, 0, canvasDOM.width, canvasDOM.height);
-        log('Canvas Cleared!');
+        if( debug ) {
+            log('Canvas Cleared!');
+        }
     }
+}
+
+const handleComponentSelect = ( event: CustomEvent ) => {
+    selectedIndex = event.detail.index;
+    canvasRender();
+    log( 'trigger:', selectedIndex );
 }
 
 /**
@@ -112,7 +125,7 @@ const canvasRender = ( ) => {
                 renderComponents(component);
             } );
         }
-            
+
         if( debug ) {
             TimeLogger.stop('Render');
             log('Render Completed');
@@ -125,8 +138,7 @@ const canvasRender = ( ) => {
  */
 const setCanvasBG = () => {
     if( canvasDOM && ctx ) {
-        // ctx.imageSmoothingEnabled = true;
-        ctx.translate(0.5, 0.5);
+        ctx.translate(0.5, 0.5); // Smoothening canvas.
         ctx.fillStyle = canvasData.background || canvasDefaultData.background;
         ctx.fillRect(0, 0, canvasDOM.width, canvasDOM.height);
     }
@@ -153,40 +165,67 @@ const renderComponents = ( component: CanvasComponent ) => {
 const processBaseComponent = ( component: CanvasComponent ) => {
     // Register editor mode.
     if( cwMode === 'editor' ) {
-        // Register draggable.
-        if( typeof component.draggable === 'undefined' || component.draggable ) {
 
-        }
     }
 }
 
+/**
+ * Draw Box component.
+ * 
+ * @param component Box Component
+ * @returns void
+ */
 const drawBoxComponent = ( component: BoxComponent ) => {
     if( ! ctx ) return;
-
-    // ctx.imageSmoothingEnabled = true;
 
     const padding = 5;
     const fontSize = component.fontSize || canvasDefaultData.fontSize;
 
-    ctx.save();
+    ctx.save(); // Save the default state to restore later.
     ctx.beginPath();
+    ctx.rect(component.x, component.y, component.w, component.h);
     if( component.fillColor ) {
+        // Draw box fill
         ctx.fillStyle = component.fillColor;
-        ctx.rect(component.x, component.y, component.w, component.h);
         ctx.fill();
     }
 
+    // Draw box stroke or border.
     ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
     ctx.strokeStyle = component.strokeColor || canvasDefaultData.strokeColor;
-    ctx.rect(component.x, component.y, component.w, component.h);
     ctx.stroke();
-    ctx.clip();
+    ctx.clip(); // Clip inner elements inside box.
 
+    // Draw box text.
     ctx.font = `${fontSize}px ${component.fontFamily}`;
     ctx.fillStyle = component.textColor || canvasDefaultData.strokeColor;
     ctx.fillText( 
         component.text, component.x + padding + ctx.lineWidth, 
         component.y + padding + fontSize + ctx.lineWidth - 5,
     );
-    ctx.restore();
+    ctx.restore(); // Restore default state.
+    
+    // Draw box selection border or indicator.
+    if( 
+        cwMode === 'editor' 
+        && selectedIndex > -1 
+        && canvasData.components?.length 
+        && selectedIndex === canvasData.components.indexOf(component) 
+    ) {
+        let strokeOffset = 2;
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
+        ctx.setLineDash([5, 5])
+        ctx.strokeStyle = 'blue';
+        ctx.rect(
+            component.x - strokeOffset, 
+            component.y - strokeOffset, 
+            component.w + (strokeOffset * 2),
+            component.h + (strokeOffset * 2)
+        );
+        ctx.stroke();
+        ctx.restore();
+    }
+
 }

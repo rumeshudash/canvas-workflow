@@ -13,6 +13,7 @@ export const RegisterDraggable = ( canvas: HTMLCanvasElement, components: Canvas
     cwComponents = components;
     canvasDOM = canvas;
     cwRender = render;
+
     canvasDOM.addEventListener('mousedown', onMouseDown );
 }
 
@@ -27,8 +28,7 @@ const onMouseDown = ( event: MouseEvent ) => {
 
     const revComponents = [ ...cwComponents ].reverse();
     const canvasEvent = getCanvasEvent( event );
-    // revComponents.reverse();
-    revComponents.map( ( comp ) => {
+    for( let comp of revComponents ) {
         if( ! isDragging && comp.type === 'box' 
             && rectCollision(canvasEvent.x, canvasEvent.y, comp as BoxComponent )  
         ) {
@@ -39,10 +39,10 @@ const onMouseDown = ( event: MouseEvent ) => {
 
             canvasDOM.addEventListener('mousemove', onMouseMove );
             canvasDOM.addEventListener('mouseup', onMouseUp );
-
-            return;
+            break;
         }
-    } )
+    }
+    triggerComponentSelect();
 }
 
 const onMouseMove = ( event: MouseEvent ) => {
@@ -64,12 +64,11 @@ const onMouseUp = () => {
 
 const rectCollision = ( x: number, y: number, rect: BoxComponent ) => {
     if(
-        rect.x > 0 && x > rect.x
-        && rect.y > 0 && y > rect.y
+        x > rect.x
+        && y > rect.y
         && x < ( rect.w + rect.x )
         && y < ( rect.h + rect.y )
     ) {
-        log('Collision: ', rect.text);
         return true;
     }
     return false;
@@ -78,4 +77,16 @@ const rectCollision = ( x: number, y: number, rect: BoxComponent ) => {
 const getCanvasEvent = ( event: MouseEvent ): { x: number, y: number} => {
     const canvasRect = canvasDOM.getBoundingClientRect();
     return { x: event.clientX - canvasRect.left, y: event.clientY - canvasRect.top }
+}
+
+const triggerComponentSelect = () => {
+    if( canvasDOM ) {
+        const event = new CustomEvent('cwComponentSelected', { 
+            detail:  { 
+                index: dragCompIndex, 
+                component: cwComponents[dragCompIndex] 
+            } 
+        });
+        canvasDOM.dispatchEvent( event );
+    }
 }

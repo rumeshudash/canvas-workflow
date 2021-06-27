@@ -69,8 +69,8 @@ const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Pr
             <div className='cw-wrapper' ref={parentRef}>
                 <canvas ref={canvasRef}></canvas>
             </div>
-            <div className='cw-settings' onClick={()=>setCwMode('viewer')}>
-                <div>settings</div>
+            <div className='cw-settings'>
+                <div onClick={()=>setCwMode('viewer')}>settings</div>
                 <button onClick={addRandomBox}>Add Random Box</button>
                 <button onClick={clearAll}>Clear All</button>
             </div>
