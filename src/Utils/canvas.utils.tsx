@@ -1,9 +1,10 @@
-import { BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { debounce, log } from "./common.utils";
+import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
+import { debounce, formatBorderRadius, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
 
-let debug = process.env.NODE_ENV === 'development';
+let forceStopDebug = true;
+let debug = ! forceStopDebug && process.env.NODE_ENV === 'development';
 
 let parentDOM: HTMLDivElement;
 let canvasDOM: HTMLCanvasElement;
@@ -18,6 +19,7 @@ let canvasDefaultData = {
     lineWidth: 1,
     fontSize: 16,
     fontFamily: 'Arial',
+    borderRadius: 3,
 }
 
 let canvasData: CanvasData = {}
@@ -93,7 +95,6 @@ export const ClearCanvas = () => {
 const handleComponentSelect = ( event: CustomEvent ) => {
     selectedIndex = event.detail.index;
     canvasRender();
-    log( 'trigger:', selectedIndex );
 }
 
 /**
@@ -183,7 +184,7 @@ const drawBoxComponent = ( component: BoxComponent ) => {
 
     ctx.save(); // Save the default state to restore later.
     ctx.beginPath();
-    ctx.rect(component.x, component.y, component.w, component.h);
+    drawRoundedRect( ctx, component.x, component.y, component.w, component.h, component.borderRadius );
     if( component.fillColor ) {
         // Draw box fill
         ctx.fillStyle = component.fillColor;
@@ -192,7 +193,7 @@ const drawBoxComponent = ( component: BoxComponent ) => {
 
     // Draw box stroke or border.
     ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
-    ctx.strokeStyle = component.strokeColor || canvasDefaultData.strokeColor;
+    ctx.strokeStyle = component.strokeColor || component.fillColor || canvasDefaultData.strokeColor;
     ctx.stroke();
     ctx.clip(); // Clip inner elements inside box.
 
@@ -218,14 +219,30 @@ const drawBoxComponent = ( component: BoxComponent ) => {
         ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
         ctx.setLineDash([5, 5])
         ctx.strokeStyle = 'blue';
-        ctx.rect(
+        drawRoundedRect(
+            ctx,
             component.x - strokeOffset, 
             component.y - strokeOffset, 
             component.w + (strokeOffset * 2),
-            component.h + (strokeOffset * 2)
+            component.h + (strokeOffset * 2),
+            component.borderRadius
         );
         ctx.stroke();
         ctx.restore();
     }
 
+}
+
+const drawRoundedRect = ( ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, borderRadius?: BorderRadius ) => {
+    const radius = formatBorderRadius( borderRadius || canvasDefaultData.borderRadius );
+    ctx.moveTo(x + radius.tl, y);
+    ctx.lineTo(x + width - radius.tr, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+    ctx.lineTo(x + width, y + height - radius.br);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+    ctx.lineTo(x + radius.bl, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+    ctx.lineTo(x, y + radius.tl);
+    ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+    ctx.closePath();
 }

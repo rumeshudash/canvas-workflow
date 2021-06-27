@@ -7,5 +7,9 @@
         flex: 1 1 auto;
         margin: 5px;
         overflow: auto;
+
+        canvas {
+            user-select: none;
+        }
     }
 }

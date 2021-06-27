@@ -25,8 +25,18 @@ export interface BoxComponent extends BaseComponent {
     textColor?: string;
     fontSize?: number;
     fontFamily?: string;
+    borderRadius?: BorderRadius;
 }
 
 export interface DiamondComponent extends BaseComponent {
 
+}
+
+export type BorderRadius = number | BorderRadiusBase;
+
+export interface BorderRadiusBase { 
+    tl: number; 
+    tr: number; 
+    br: number; 
+    bl: number 
 }

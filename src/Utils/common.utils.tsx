@@ -1,3 +1,5 @@
+import { BorderRadius, BorderRadiusBase } from "../Dtos/canvas.dtos";
+
 /**
  * Log tag.
  */
@@ -18,6 +20,13 @@ export function debounce(func: Function, timeout = 300){
     };
 }
 
+/**
+ * Get reversed index of item in array.
+ * 
+ * @param arr Arrays
+ * @param item Item in array
+ * @returns number
+ */
 export const reversedIndexOf = function( arr: any[], item: any){
     const { length } = arr;
     const index = arr.indexOf(item);
@@ -26,6 +35,25 @@ export const reversedIndexOf = function( arr: any[], item: any){
     };
     return length - index - 1;
 };
+
+/**
+ * Format the border radius.
+ * 
+ * @param borderRadius BorderRadius
+ * @returns BorderRadiusBase
+ */
+export const formatBorderRadius = ( borderRadius?: BorderRadius ): BorderRadiusBase => {
+    if( typeof borderRadius !== 'number' ) {
+        return { ...{ tl: 0, tr: 0, br: 0, bl: 0 }, ...borderRadius };
+    }
+    
+    return { 
+        tl: borderRadius as number, 
+        tr: borderRadius as number, 
+        br: borderRadius as number, 
+        bl: borderRadius as number 
+    };
+}
 
 /**
  * Custom Log with tag.

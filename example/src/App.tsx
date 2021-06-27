@@ -15,11 +15,12 @@ const App = () => {
                     text: 'Rumesh',
                     x: 10, 
                     y: 10,
-                    w: 100, 
+                    w: 150,
                     h: 100,
                     fillColor: 'red',
                     strokeColor: 'green',
                     lineWidth: 1,
+                    borderRadius: 5,
                 }
             ]
         })

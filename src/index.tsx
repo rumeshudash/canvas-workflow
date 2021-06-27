@@ -42,6 +42,8 @@ const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Pr
     const addRandomBox = () => {
         const randomX = Math.floor( Math.random() * ( canvasRef.current?.width || 100 ) );
         const randomY = Math.floor( Math.random() * ( canvasRef.current?.height || 100 ) );
+        const randomRadius = Math.floor( Math.random() * 15 );
+
         const comp: BoxComponent = {
             type: 'box',
             x: randomX,
@@ -49,14 +51,14 @@ const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Pr
             w: 100,
             h: 100,
             fillColor: 'green',
-            text: 'Random ' + randomX + ':' + randomY
+            text: 'Random ' + randomX + ':' + randomY,
+            borderRadius: randomRadius,
         }
         setCwData( { ...cwData, components: [ ...cwData?.components || [], comp ] })
     }
 
     const clearAll = () => {
         setCwData( { ...cwData, components: [] } );
-        log(cwData);
     }
 
     return (
