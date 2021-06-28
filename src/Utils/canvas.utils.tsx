@@ -1,5 +1,5 @@
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { debounce, formatBorderRadius, log } from "./common.utils";
+import { debounce, formatBorderRadius, getSelectionBoxCords, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
 
@@ -13,9 +13,11 @@ let cwMode: 'editor' | 'viewer';
 
 let canvasDefaultData = {
     height: 500,
-    background: '#eeeeee',
+    background: '#efefef',
     hoverColor: '#0000ff',
     strokeColor: '#000000',
+    selectionStrokeColor: '#7f7f7f',
+    selectionLineWidth: 1,
     lineWidth: 1,
     fontSize: 16,
     fontFamily: 'Arial',
@@ -156,6 +158,7 @@ const renderComponents = ( component: CanvasComponent ) => {
             drawBoxComponent( component as BoxComponent );
             break;
     }
+    drawSelectionHandle( component );
 }
 
 /**
@@ -166,7 +169,71 @@ const renderComponents = ( component: CanvasComponent ) => {
 const processBaseComponent = ( component: CanvasComponent ) => {
     // Register editor mode.
     if( cwMode === 'editor' ) {
+        
+    }
+}
 
+/**
+ * Draw box selection border or indicator.
+ * 
+ * @param component Canvas Component
+ */
+const drawSelectionHandle = ( component: CanvasComponent ) => {
+    if( 
+        ctx 
+        && cwMode === 'editor'
+        && selectedIndex > -1 
+        && canvasData.components?.length 
+        && selectedIndex === canvasData.components.indexOf(component) 
+    ) {
+        let strokeOffset = 3;
+        let dashedLine = true;
+        let compDimension = {
+            x: component.x,
+            y: component.y,
+            w: 0,
+            h: 0,
+        }
+
+        switch( component.type ) {
+            case 'box':
+                const comp = component as BoxComponent;
+                compDimension.w = comp.w;
+                compDimension.h = comp.h;
+                // dashedLine = false;
+                break;
+        }
+
+        // Draw border for selections.
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = canvasData.selectionLineWidth || canvasDefaultData.selectionLineWidth;
+        if( dashedLine ) {
+            ctx.setLineDash([5, 5])
+        }
+        ctx.strokeStyle = canvasData.selectionStrokeColor || canvasDefaultData.selectionStrokeColor;
+        ctx.rect( 
+            compDimension.x - strokeOffset, 
+            compDimension.y - strokeOffset,
+            compDimension.w + (strokeOffset * 2),
+            compDimension.h + (strokeOffset * 2),
+        )
+        ctx.stroke();
+        ctx.restore();
+
+        // Draw border points
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = canvasData.selectionStrokeColor || canvasDefaultData.selectionStrokeColor;
+        let boxSize = 7;
+        
+        const selectionBoxes = getSelectionBoxCords( compDimension, strokeOffset, boxSize );
+        for( let box of selectionBoxes ) {
+            ctx.rect( box.x, box.y, box.w, box.h );
+        }
+
+        ctx.fill();
+        ctx.restore();
     }
 }
 
@@ -205,31 +272,6 @@ const drawBoxComponent = ( component: BoxComponent ) => {
         component.y + padding + fontSize + ctx.lineWidth - 5,
     );
     ctx.restore(); // Restore default state.
-    
-    // Draw box selection border or indicator.
-    if( 
-        cwMode === 'editor' 
-        && selectedIndex > -1 
-        && canvasData.components?.length 
-        && selectedIndex === canvasData.components.indexOf(component) 
-    ) {
-        let strokeOffset = 2;
-        ctx.save();
-        ctx.beginPath();
-        ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
-        ctx.setLineDash([5, 5])
-        ctx.strokeStyle = 'blue';
-        drawRoundedRect(
-            ctx,
-            component.x - strokeOffset, 
-            component.y - strokeOffset, 
-            component.w + (strokeOffset * 2),
-            component.h + (strokeOffset * 2),
-            component.borderRadius
-        );
-        ctx.stroke();
-        ctx.restore();
-    }
 
 }
 

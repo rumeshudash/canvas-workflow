@@ -2,6 +2,8 @@ export interface CanvasData {
     height?: number,
     background?: string,
     hoverColor?: string,
+    selectionStrokeColor?: string,
+    selectionLineWidth?: number,
     components?: CanvasComponent[],
 }
 
@@ -9,13 +11,13 @@ export type CanvasComponent = BoxComponent | DiamondComponent;
 
 export interface BaseComponent {
     type: string;
-    // paths?: { x: number, y: number }[];
     x: number;
     y: number;
     fillColor?: string;
     lineWidth?: number;
     strokeColor?: string;
     draggable?: boolean;
+    angle?: number;
 }
 
 export interface BoxComponent extends BaseComponent {

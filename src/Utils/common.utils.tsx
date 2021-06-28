@@ -56,6 +56,47 @@ export const formatBorderRadius = ( borderRadius?: BorderRadius ): BorderRadiusB
 }
 
 /**
+ * Get selection box coordinates.
+ * 
+ * @param compDimension Component Dimension.
+ * @param strokeOffset Selection stroke offset.
+ * @param boxSize Box size.
+ * @returns Array
+ */
+export const getSelectionBoxCords = ( compDimension: { x: number, y: number, w: number, h: number }, strokeOffset: number, boxSize: number ) => {
+    let boxCords: { x: number, y: number, w: number, h: number }[] = [];
+
+    for( let i = 1; i <= 8; i++ ) {
+        let boxCord = {
+            x: 0,
+            y: 0,
+            w: boxSize,
+            h: boxSize,
+        }
+
+        if( [ 1, 7, 8 ].includes(i) ) {
+            boxCord.x = compDimension.x - strokeOffset - (boxSize / 2);
+        } else if( [ 2, 6 ].includes(i) ) {
+            boxCord.x = compDimension.x + ( compDimension.w / 2 ) + ( strokeOffset / 2 ) - (boxSize / 2);
+        } else if( [ 3, 4, 5 ].includes(i) ) {
+            boxCord.x = compDimension.x + compDimension.w + strokeOffset - (boxSize / 2);
+        }
+
+        if( [ 1, 2, 3 ].includes(i) ) {
+            boxCord.y = compDimension.y - strokeOffset - (boxSize / 2);
+        } else if( [ 4, 8 ].includes(i) ) {
+            boxCord.y = compDimension.y + ( compDimension.h / 2 ) + ( strokeOffset / 2 ) - (boxSize / 2);
+        } else if( [ 5, 6, 7 ].includes(i) ) {
+            boxCord.y = compDimension.y + compDimension.h + strokeOffset - (boxSize / 2);
+        }
+
+        boxCords.push( boxCord );
+    }
+
+    return boxCords;
+}
+
+/**
  * Custom Log with tag.
  * 
  * @param message Any values to log.
