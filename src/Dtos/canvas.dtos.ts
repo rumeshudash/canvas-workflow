@@ -17,7 +17,6 @@ export interface BaseComponent {
     lineWidth?: number;
     strokeColor?: string;
     draggable?: boolean;
-    angle?: number;
 }
 
 export interface BoxComponent extends BaseComponent {
