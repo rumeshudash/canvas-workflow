@@ -4,6 +4,9 @@
 
 [![NPM](https://img.shields.io/npm/v/canvas-workflow.svg)](https://www.npmjs.com/package/canvas-workflow) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
+## Demo
+[Demo Link](https://rumeshudash.github.io/canvas-workflow/)
+
 ## Install
 
 ```bash
