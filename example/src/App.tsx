@@ -12,7 +12,8 @@ const App = () => {
             components:[
                 { 
                     type: 'box',
-                    text: 'Rumesh',
+                    title: 'Rumesh',
+                    description: 'Hello my name is rumesh udash',
                     x: 100,
                     y: 100,
                     w: 150,

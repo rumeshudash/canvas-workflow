@@ -22,7 +22,8 @@ export interface BaseComponent {
 export interface BoxComponent extends BaseComponent {
     w: number;
     h: number;
-    text: string;
+    title: string;
+    description?: string;
     textColor?: string;
     fontSize?: number;
     fontFamily?: string;

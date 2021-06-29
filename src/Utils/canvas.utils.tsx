@@ -1,7 +1,8 @@
-import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { debounce, formatBorderRadius, getSelectionBoxCords, log } from "./common.utils";
+import { BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
+import { debounce, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
+import { drawBoxComponent, drawSelectionHandle } from './draw.utils';
 
 let forceStopDebug = true;
 let debug = ! forceStopDebug && process.env.NODE_ENV === 'development';
@@ -13,7 +14,7 @@ let cwMode: 'editor' | 'viewer';
 
 let canvasDefaultData = {
     height: 500,
-    background: '#efefef',
+    background: '#f5f5f5',
     hoverColor: '#0000ff',
     strokeColor: '#000000',
     selectionStrokeColor: '#7f7f7f',
@@ -155,10 +156,10 @@ const renderComponents = ( component: CanvasComponent ) => {
     processBaseComponent( component );
     switch( component.type ) {
         case 'box':
-            drawBoxComponent( component as BoxComponent );
+            drawBoxComponent( component as BoxComponent, canvasDefaultData, ctx );
             break;
     }
-    drawSelectionHandle( component );
+    drawSelectionHandle( component, canvasData, selectedIndex, canvasDefaultData, cwMode, ctx );
 }
 
 /**
@@ -171,120 +172,4 @@ const processBaseComponent = ( component: CanvasComponent ) => {
     if( cwMode === 'editor' ) {
         
     }
-}
-
-/**
- * Draw box selection border or indicator.
- * 
- * @param component Canvas Component
- */
-const drawSelectionHandle = ( component: CanvasComponent ) => {
-    if( 
-        ctx 
-        && cwMode === 'editor'
-        && selectedIndex > -1 
-        && canvasData.components?.length 
-        && selectedIndex === canvasData.components.indexOf(component) 
-    ) {
-        let strokeOffset = 3;
-        let dashedLine = true;
-        let compDimension = {
-            x: component.x,
-            y: component.y,
-            w: 0,
-            h: 0,
-        }
-
-        switch( component.type ) {
-            case 'box':
-                const comp = component as BoxComponent;
-                compDimension.w = comp.w;
-                compDimension.h = comp.h;
-                // dashedLine = false;
-                break;
-        }
-
-        // Draw border for selections.
-        ctx.save();
-        ctx.beginPath();
-        ctx.lineWidth = canvasData.selectionLineWidth || canvasDefaultData.selectionLineWidth;
-        if( dashedLine ) {
-            ctx.setLineDash([5, 5])
-        }
-        ctx.strokeStyle = canvasData.selectionStrokeColor || canvasDefaultData.selectionStrokeColor;
-        ctx.rect( 
-            compDimension.x - strokeOffset, 
-            compDimension.y - strokeOffset,
-            compDimension.w + (strokeOffset * 2),
-            compDimension.h + (strokeOffset * 2),
-        )
-        ctx.stroke();
-        ctx.restore();
-
-        // Draw border points
-        ctx.save();
-        ctx.beginPath();
-        ctx.fillStyle = canvasData.selectionStrokeColor || canvasDefaultData.selectionStrokeColor;
-        let boxSize = 7;
-        
-        const selectionBoxes = getSelectionBoxCords( compDimension, strokeOffset, boxSize );
-        for( let box of selectionBoxes ) {
-            ctx.rect( box.x, box.y, box.w, box.h );
-        }
-
-        ctx.fill();
-        ctx.restore();
-    }
-}
-
-/**
- * Draw Box component.
- * 
- * @param component Box Component
- * @returns void
- */
-const drawBoxComponent = ( component: BoxComponent ) => {
-    if( ! ctx ) return;
-
-    const padding = 5;
-    const fontSize = component.fontSize || canvasDefaultData.fontSize;
-
-    ctx.save(); // Save the default state to restore later.
-    ctx.beginPath();
-    drawRoundedRect( ctx, component.x, component.y, component.w, component.h, component.borderRadius );
-    if( component.fillColor ) {
-        // Draw box fill
-        ctx.fillStyle = component.fillColor;
-        ctx.fill();
-    }
-
-    // Draw box stroke or border.
-    ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
-    ctx.strokeStyle = component.strokeColor || component.fillColor || canvasDefaultData.strokeColor;
-    ctx.stroke();
-    ctx.clip(); // Clip inner elements inside box.
-
-    // Draw box text.
-    ctx.font = `${fontSize}px ${component.fontFamily}`;
-    ctx.fillStyle = component.textColor || canvasDefaultData.strokeColor;
-    ctx.fillText( 
-        component.text, component.x + padding + ctx.lineWidth, 
-        component.y + padding + fontSize + ctx.lineWidth - 5,
-    );
-    ctx.restore(); // Restore default state.
-
-}
-
-const drawRoundedRect = ( ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, borderRadius?: BorderRadius ) => {
-    const radius = formatBorderRadius( borderRadius || canvasDefaultData.borderRadius );
-    ctx.moveTo(x + radius.tl, y);
-    ctx.lineTo(x + width - radius.tr, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
-    ctx.lineTo(x + width, y + height - radius.br);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
-    ctx.lineTo(x + radius.bl, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
-    ctx.lineTo(x, y + radius.tl);
-    ctx.quadraticCurveTo(x, y, x + radius.tl, y);
-    ctx.closePath();
 }
