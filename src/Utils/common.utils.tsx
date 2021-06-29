@@ -1,3 +1,4 @@
+import { SELECTION_BOX_OFFSET, SELECTION_RESIZE_BOX_SIZE } from "../Constants/canvas.constants";
 import { BorderRadius, BorderRadiusBase } from "../Dtos/canvas.dtos";
 
 /**
@@ -27,7 +28,7 @@ export function debounce(func: Function, timeout = 300){
  * @param item Item in array
  * @returns number
  */
-export const reversedIndexOf = function( arr: any[], item: any){
+export const reversedIndexOf = ( arr: any[], item: any): number => {
     const { length } = arr;
     const index = arr.indexOf(item);
     if(index === -1){
@@ -56,10 +57,51 @@ export const formatBorderRadius = ( borderRadius?: BorderRadius ): BorderRadiusB
 }
 
 /**
+ * Get selection box coordinates.
+ * 
+ * @param compDimension Component Dimension.
+ * @param strokeOffset Selection stroke offset.
+ * @param boxSize Box size.
+ * @returns Array
+ */
+export const getSelectionBoxCords = ( compDimension: { x: number, y: number, w: number, h: number } ): { x: number, y: number, w: number, h: number }[] => {
+    let boxCords: { x: number, y: number, w: number, h: number }[] = [];
+
+    for( let i = 1; i <= 8; i++ ) {
+        let boxCord = {
+            x: 0,
+            y: 0,
+            w: SELECTION_RESIZE_BOX_SIZE,
+            h: SELECTION_RESIZE_BOX_SIZE,
+        }
+
+        if( [ 1, 7, 8 ].includes(i) ) {
+            boxCord.x = compDimension.x - SELECTION_BOX_OFFSET - (SELECTION_RESIZE_BOX_SIZE / 2);
+        } else if( [ 2, 6 ].includes(i) ) {
+            boxCord.x = compDimension.x + ( compDimension.w / 2 ) + ( SELECTION_BOX_OFFSET / 2 ) - (SELECTION_RESIZE_BOX_SIZE / 2);
+        } else if( [ 3, 4, 5 ].includes(i) ) {
+            boxCord.x = compDimension.x + compDimension.w + SELECTION_BOX_OFFSET - (SELECTION_RESIZE_BOX_SIZE / 2);
+        }
+
+        if( [ 1, 2, 3 ].includes(i) ) {
+            boxCord.y = compDimension.y - SELECTION_BOX_OFFSET - (SELECTION_RESIZE_BOX_SIZE / 2);
+        } else if( [ 4, 8 ].includes(i) ) {
+            boxCord.y = compDimension.y + ( compDimension.h / 2 ) + ( SELECTION_BOX_OFFSET / 2 ) - (SELECTION_RESIZE_BOX_SIZE / 2);
+        } else if( [ 5, 6, 7 ].includes(i) ) {
+            boxCord.y = compDimension.y + compDimension.h + SELECTION_BOX_OFFSET - (SELECTION_RESIZE_BOX_SIZE / 2);
+        }
+
+        boxCords.push( boxCord );
+    }
+
+    return boxCords;
+}
+
+/**
  * Custom Log with tag.
  * 
  * @param message Any values to log.
  */
-export const log = ( ...message: any[] ) => {
+export const log = ( ...message: any[] ): void => {
     console.log( logTag, ...message );
 }

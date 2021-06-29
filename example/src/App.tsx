@@ -12,9 +12,10 @@ const App = () => {
             components:[
                 { 
                     type: 'box',
-                    text: 'Rumesh',
-                    x: 10, 
-                    y: 10,
+                    title: 'Rumesh',
+                    description: 'Hello my name is rumesh udash',
+                    x: 100,
+                    y: 100,
                     w: 150,
                     h: 100,
                     fillColor: 'red',
@@ -33,7 +34,7 @@ const App = () => {
     return (
         <div>
             <CanvasWorkflow mode='editor' data={data} onDataChange={dataChangeHandle} />
-            {/* <CanvasWorkflow mode='viewer' /> */}
+            {/* <CanvasWorkflow mode='viewer' data={data} /> */}
         </div>
     )
 }

@@ -1,7 +1,8 @@
-import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { debounce, formatBorderRadius, log } from "./common.utils";
+import { BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
+import { debounce, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
+import { drawBoxComponent, drawSelectionHandle } from './draw.utils';
 
 let forceStopDebug = true;
 let debug = ! forceStopDebug && process.env.NODE_ENV === 'development';
@@ -13,9 +14,11 @@ let cwMode: 'editor' | 'viewer';
 
 let canvasDefaultData = {
     height: 500,
-    background: '#eeeeee',
+    background: '#f5f5f5',
     hoverColor: '#0000ff',
     strokeColor: '#000000',
+    selectionStrokeColor: '#7f7f7f',
+    selectionLineWidth: 1,
     lineWidth: 1,
     fontSize: 16,
     fontFamily: 'Arial',
@@ -153,9 +156,10 @@ const renderComponents = ( component: CanvasComponent ) => {
     processBaseComponent( component );
     switch( component.type ) {
         case 'box':
-            drawBoxComponent( component as BoxComponent );
+            drawBoxComponent( component as BoxComponent, canvasDefaultData, ctx );
             break;
     }
+    drawSelectionHandle( component, canvasData, selectedIndex, canvasDefaultData, cwMode, ctx );
 }
 
 /**
@@ -166,83 +170,6 @@ const renderComponents = ( component: CanvasComponent ) => {
 const processBaseComponent = ( component: CanvasComponent ) => {
     // Register editor mode.
     if( cwMode === 'editor' ) {
-
+        
     }
-}
-
-/**
- * Draw Box component.
- * 
- * @param component Box Component
- * @returns void
- */
-const drawBoxComponent = ( component: BoxComponent ) => {
-    if( ! ctx ) return;
-
-    const padding = 5;
-    const fontSize = component.fontSize || canvasDefaultData.fontSize;
-
-    ctx.save(); // Save the default state to restore later.
-    ctx.beginPath();
-    drawRoundedRect( ctx, component.x, component.y, component.w, component.h, component.borderRadius );
-    if( component.fillColor ) {
-        // Draw box fill
-        ctx.fillStyle = component.fillColor;
-        ctx.fill();
-    }
-
-    // Draw box stroke or border.
-    ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
-    ctx.strokeStyle = component.strokeColor || component.fillColor || canvasDefaultData.strokeColor;
-    ctx.stroke();
-    ctx.clip(); // Clip inner elements inside box.
-
-    // Draw box text.
-    ctx.font = `${fontSize}px ${component.fontFamily}`;
-    ctx.fillStyle = component.textColor || canvasDefaultData.strokeColor;
-    ctx.fillText( 
-        component.text, component.x + padding + ctx.lineWidth, 
-        component.y + padding + fontSize + ctx.lineWidth - 5,
-    );
-    ctx.restore(); // Restore default state.
-    
-    // Draw box selection border or indicator.
-    if( 
-        cwMode === 'editor' 
-        && selectedIndex > -1 
-        && canvasData.components?.length 
-        && selectedIndex === canvasData.components.indexOf(component) 
-    ) {
-        let strokeOffset = 2;
-        ctx.save();
-        ctx.beginPath();
-        ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
-        ctx.setLineDash([5, 5])
-        ctx.strokeStyle = 'blue';
-        drawRoundedRect(
-            ctx,
-            component.x - strokeOffset, 
-            component.y - strokeOffset, 
-            component.w + (strokeOffset * 2),
-            component.h + (strokeOffset * 2),
-            component.borderRadius
-        );
-        ctx.stroke();
-        ctx.restore();
-    }
-
-}
-
-const drawRoundedRect = ( ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, borderRadius?: BorderRadius ) => {
-    const radius = formatBorderRadius( borderRadius || canvasDefaultData.borderRadius );
-    ctx.moveTo(x + radius.tl, y);
-    ctx.lineTo(x + width - radius.tr, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
-    ctx.lineTo(x + width, y + height - radius.br);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
-    ctx.lineTo(x + radius.bl, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
-    ctx.lineTo(x, y + radius.tl);
-    ctx.quadraticCurveTo(x, y, x + radius.tl, y);
-    ctx.closePath();
 }
