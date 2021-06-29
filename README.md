@@ -2,7 +2,9 @@
 
 > Made with create-react-library
 
-[![NPM](https://img.shields.io/npm/v/canvas-workflow.svg)](https://www.npmjs.com/package/canvas-workflow) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![NPM](https://img.shields.io/npm/v/canvas-workflow.svg)](https://www.npmjs.com/package/canvas-workflow) 
+[![Deploy Github Page](https://github.com/rumeshudash/canvas-workflow/actions/workflows/main.yml/badge.svg)](https://github.com/rumeshudash/canvas-workflow/actions/workflows/main.yml)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 ## Demo
 [Demo Link](https://rumeshudash.github.io/canvas-workflow/)
