@@ -46,14 +46,14 @@ const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Pr
 
         const comp: BoxComponent = {
             type: 'box',
+            title: 'Random',
+            description: 'Random ' + randomX + ':' + randomY,
             x: randomX,
             y: randomY,
-            w: 100,
+            w: 150,
             h: 100,
             fillColor: '#ffffff',
             strokeColor: '#ccc',
-            title: 'Random',
-            description: 'Random ' + randomX + ':' + randomY,
             borderRadius: 2,
         }
         setCwData( { ...cwData, components: [ ...cwData?.components || [], comp ] })

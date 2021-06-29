@@ -1,3 +1,4 @@
+import { SELECTION_BOX_OFFSET } from "../Constants/canvas.constants";
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
 import { formatBorderRadius, getSelectionBoxCords, log } from "./common.utils";
 
@@ -40,16 +41,15 @@ export const drawBoxComponent = ( component: BoxComponent, canvasDefaultData: an
     
     if( component.description ) {
         printAtWordWrap( 
-            ctx, 
+            ctx,
             component.description,
             component.x + padding + ctx.lineWidth,
             component.y + (padding * 2) + (fontSize * 2) + ctx.lineWidth - 5,
             fontSize,
-            component.w - padding - ctx.lineWidth,
+            component.w - (padding * 2) - ctx.lineWidth,
         );
     }
     ctx.restore(); // Restore default state.
-
 }
 
 
@@ -80,7 +80,6 @@ export const drawSelectionHandle = ( component: CanvasComponent, canvasData: Can
         && canvasData.components?.length 
         && selectedIndex === canvasData.components.indexOf(component) 
     ) {
-        let strokeOffset = 3;
         let dashedLine = true;
         let compDimension = {
             x: component.x,
@@ -107,10 +106,10 @@ export const drawSelectionHandle = ( component: CanvasComponent, canvasData: Can
         }
         ctx.strokeStyle = canvasData.selectionStrokeColor || canvasDefaultData.selectionStrokeColor;
         ctx.rect( 
-            compDimension.x - strokeOffset, 
-            compDimension.y - strokeOffset,
-            compDimension.w + (strokeOffset * 2),
-            compDimension.h + (strokeOffset * 2),
+            compDimension.x - SELECTION_BOX_OFFSET, 
+            compDimension.y - SELECTION_BOX_OFFSET,
+            compDimension.w + (SELECTION_BOX_OFFSET * 2),
+            compDimension.h + (SELECTION_BOX_OFFSET * 2),
         )
         ctx.stroke();
         ctx.restore();
@@ -119,9 +118,8 @@ export const drawSelectionHandle = ( component: CanvasComponent, canvasData: Can
         ctx.save();
         ctx.beginPath();
         ctx.fillStyle = canvasData.selectionStrokeColor || canvasDefaultData.selectionStrokeColor;
-        let boxSize = 7;
         
-        const selectionBoxes = getSelectionBoxCords( compDimension, strokeOffset, boxSize );
+        const selectionBoxes = getSelectionBoxCords( compDimension );
         for( let box of selectionBoxes ) {
             ctx.rect( box.x, box.y, box.w, box.h );
         }
@@ -140,7 +138,6 @@ export const printAtWordWrap = ( ctx: CanvasRenderingContext2D , text: string, x
         return;
     }
     var words = text.split(' ');
-    log( words );
     var currentLine = 0;
     var idx = 1;
     while (words.length > 0 && idx <= words.length)

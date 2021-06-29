@@ -13,6 +13,8 @@ export interface BaseComponent {
     type: string;
     x: number;
     y: number;
+    w: number;
+    h: number;
     fillColor?: string;
     lineWidth?: number;
     strokeColor?: string;
@@ -20,8 +22,6 @@ export interface BaseComponent {
 }
 
 export interface BoxComponent extends BaseComponent {
-    w: number;
-    h: number;
     title: string;
     description?: string;
     textColor?: string;
