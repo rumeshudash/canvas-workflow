@@ -71,7 +71,7 @@ const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Pr
                 </div>
             </div>
             <div className='cw-wrapper' ref={parentRef}>
-                <canvas ref={canvasRef}></canvas>
+                <canvas ref={canvasRef} tabIndex={1}></canvas>
             </div>
             <div className='cw-settings'>
                 <div onClick={()=>setCwMode('viewer')}>settings</div>
