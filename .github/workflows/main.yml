@@ -30,20 +30,14 @@ jobs:
         # uses: CultureHQ/actions-yarn@661c6f3a66041c2432bcfb78096b9207304614c8
         uses: CultureHQ/actions-yarn@v1.0.1
       
-      - name: Install Dependencies
+      - name: Build Package
         run: yarn
         
-      - name: Build package
-        run: yarn run build
-        
-      - name: Install Example Dependencies
-        run: |
-          cd example/
-          yarn
-          yarn run build
+      - name: Build Example
+        run: yarn run predeploy
         
       - name: Deploy Page
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages # The branch the action should deploy to.
-          folder: build
+          folder: example/build
