@@ -22,6 +22,45 @@ export function debounce(func: Function, timeout = 300){
 }
 
 /**
+ * Checks if two given objects are same 
+ * NOTE: Mainly used in persitance for identifying if two params are same
+ * @param  {object} object
+ * @param  {object} otherObject
+ */
+export function IsEqualObject(object: any, otherObject: any) {
+    let objKeys = Object.keys(object || {}),
+        otherKeys = Object.keys(otherObject || {});
+    
+    // Check length of object matches.
+    if (objKeys.length !== otherKeys.length) {
+        return false;
+    }
+
+    // Check index keys matches.
+    for( let objKey in objKeys ) {
+        if( objKeys[objKey] !== otherKeys[objKey] ) {
+            return false;
+        }
+    }
+
+    // Check array inside object.
+    for( let objKey of objKeys ) {
+        if( Array.isArray( object[objKey] ) ) {
+            if( object[objKey].length !== otherObject[objKey].length ) {
+                return false;
+            }
+
+            for( let i = 0; i < object[objKey].length; i++ ) {
+                if( object[objKey][i] !== otherObject[objKey][i] ) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+/**
  * Get reversed index of item in array.
  * 
  * @param arr Arrays
