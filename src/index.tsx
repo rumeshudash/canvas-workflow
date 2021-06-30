@@ -1,7 +1,7 @@
 import React, { createRef, useEffect, useState } from 'react'
 import { BoxComponent, CanvasData } from './Dtos/canvas.dtos';
 import { DestroyCanvas, InitCanvas } from './Utils/canvas.utils';
-import { IsEqualObject, log } from './Utils/common.utils';
+import { IsEqualObject } from './Utils/common.utils';
 import './styles.scss'
 
 interface Props {
