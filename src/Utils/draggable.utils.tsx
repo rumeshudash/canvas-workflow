@@ -306,12 +306,24 @@ const getCanvasCursorPos = ( event: MouseEvent ): { x: number, y: number} => {
  */
 const triggerComponentSelect = (): void => {
     if( canvasDOM ) {
-        const event = new CustomEvent('cwComponentSelected', { 
+        canvasDOM.dispatchEvent( new CustomEvent('cwComponentSelected', { 
             detail:  { 
                 index: dragCompIndex, 
                 component: cwComponents[dragCompIndex] 
             } 
-        });
-        canvasDOM.dispatchEvent( event );
+        }) );
     }
 }
+
+/**
+ * Trigger component moving event. 'cwComponentMoving'
+ */
+// const triggerComponentMoving = (): void => {
+//     if( canvasDOM ) {
+//         canvasDOM.dispatchEvent( new CustomEvent('cwComponentMoving', { 
+//             detail:  { 
+//                 components: cwComponents,
+//             }
+//         }) );
+//     }
+// }

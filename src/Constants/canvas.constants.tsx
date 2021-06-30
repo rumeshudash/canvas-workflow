@@ -1,3 +1,4 @@
+export const CANVAS_HEIGHT = 500;
 export const SELECTION_BOX_OFFSET = 3;
 export const SELECTION_RESIZE_BOX_SIZE = 7;
 export const SELECTION_RESIZE_BOX_CURSORS = [ 

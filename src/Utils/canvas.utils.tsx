@@ -3,6 +3,7 @@ import { debounce, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
 import { drawBoxComponent, drawSelectionHandle } from './draw.utils';
+import { CANVAS_HEIGHT } from "../Constants/canvas.constants";
 
 let forceStopDebug = true;
 let debug = ! forceStopDebug && process.env.NODE_ENV === 'development';
@@ -14,7 +15,6 @@ let handleDataChange: ( data: CanvasData ) => void;
 let cwMode: 'editor' | 'viewer';
 
 let canvasDefaultData = {
-    height: 500,
     background: '#f5f5f5',
     hoverColor: '#0000ff',
     strokeColor: '#000000',
@@ -115,11 +115,11 @@ const debouncRender = debounce( () => canvasRender() );
 /**
  * Main render function for canvas.
  */
-const canvasRender = ( triggerDataChange = true ) => {
+export const canvasRender = ( triggerDataChange = true ) => {
     if( parentDOM && canvasDOM && ctx ) {
         let parentDim = parentDOM.getBoundingClientRect();
         canvasDOM.width = parentDim.width;
-        canvasDOM.height = canvasData.height || canvasDefaultData.height;
+        canvasDOM.height = canvasData.height || CANVAS_HEIGHT;
     
         ClearCanvas();
     
