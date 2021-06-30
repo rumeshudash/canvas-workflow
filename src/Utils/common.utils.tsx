@@ -55,6 +55,8 @@ export function IsEqualObject(object: any, otherObject: any) {
                     return false;
                 }
             }
+        } else if( object[objKey] !== otherObject[objKey] ) {
+            return false;
         }
     }
     return true;

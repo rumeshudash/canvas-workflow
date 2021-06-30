@@ -1,7 +1,8 @@
 import React, { createRef, useEffect, useState } from 'react'
 import { BoxComponent, CanvasData } from './Dtos/canvas.dtos';
 import { DestroyCanvas, InitCanvas } from './Utils/canvas.utils';
-import { IsEqualObject } from './Utils/common.utils';
+import { IsEqualObject, log } from './Utils/common.utils';
+import Settings from './Components/Settings/settings.component';
 import './styles.scss'
 
 interface Props {
@@ -83,8 +84,8 @@ const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => 
             <div className='cw-wrapper' ref={parentRef}>
                 <canvas ref={canvasRef} tabIndex={1}></canvas>
             </div>
-            <div className='cw-settings'>
-                <div onClick={()=>setCwMode('viewer')}>settings</div>
+            <div>
+                <Settings data={cwData} canvasRef={canvasRef} />
                 <button onClick={addRandomBox}>Add Random Box</button>
                 <button onClick={clearAll}>Clear All</button>
             </div>
