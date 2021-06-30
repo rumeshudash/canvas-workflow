@@ -144,3 +144,12 @@ export const getSelectionBoxCords = ( compDimension: { x: number, y: number, w: 
 export const log = ( ...message: any[] ): void => {
     console.log( logTag, ...message );
 }
+
+export const loadAsset = (asset: string) => {
+    try {
+        if (asset.includes('static')) return asset;
+        return require(`./${asset}`);
+    } catch (error) {
+        return asset;
+    }
+};

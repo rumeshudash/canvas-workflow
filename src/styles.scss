@@ -5,10 +5,11 @@
 
     .cw-wrapper {
         flex: 1 1 auto;
-        margin: 5px;
+        margin: 0 5px;
         overflow: auto;
 
         canvas {
+            display: block;
             user-select: none;
         }
     }

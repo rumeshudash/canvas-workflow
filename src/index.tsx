@@ -2,6 +2,7 @@ import React, { createRef, useEffect, useState } from 'react'
 import { BoxComponent, CanvasData } from './Dtos/canvas.dtos';
 import { DestroyCanvas, InitCanvas } from './Utils/canvas.utils';
 import { IsEqualObject } from './Utils/common.utils';
+import Toolbar from './Components/Toolbar/toolbar.component';
 import './styles.scss'
 
 interface Props {
@@ -75,11 +76,7 @@ const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => 
 
     return (
         <div className={`canvas-workflow`} >
-            <div className='cw-tools'>
-                <div className=''>
-                    <div>Tool Box</div>
-                </div>
-            </div>
+            <Toolbar />
             <div className='cw-wrapper' ref={parentRef}>
                 <canvas ref={canvasRef} tabIndex={1}></canvas>
             </div>

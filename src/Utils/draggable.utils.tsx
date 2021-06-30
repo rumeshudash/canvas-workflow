@@ -249,8 +249,8 @@ const onMouseUp = (): void => {
  * @param event KeyboardEvent
  */
 const onKeyDown = ( event: KeyboardEvent ): void => {
-    event.preventDefault();
     if( event.key === ' ' && ! listenMovingCanvas ) {
+        event.preventDefault();
         canvasDOM.style.cursor = 'grab'
         listenMovingCanvas = true;
     } 
