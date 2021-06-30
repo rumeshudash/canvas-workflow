@@ -1,28 +1,37 @@
 import React, { createRef, useEffect, useState } from 'react'
 import { BoxComponent, CanvasData } from './Dtos/canvas.dtos';
-import './styles.scss'
 import { DestroyCanvas, InitCanvas } from './Utils/canvas.utils';
-import { log } from './Utils/common.utils';
+import { IsEqualObject, log } from './Utils/common.utils';
+import './styles.scss'
 
 interface Props {
     mode?: 'editor' | 'viewer';
-    defaultData?: CanvasData;
     data?: CanvasData;
     onDataChange?( data: CanvasData ): void;
 }
 
-const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Props) => {
+const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => {
 
     const [cwMode, setCwMode] = useState(mode);
-    const [cwData, setCwData] = useState<CanvasData | undefined>(data || defaultData);
+    const [cwData, setCwData] = useState<CanvasData>(data);
 
     const canvasRef = createRef<HTMLCanvasElement>();
     const parentRef = createRef<HTMLDivElement>();
 
     useEffect(() => {
-        setCwMode(mode);
-        setCwData(data);
-    }, [mode, data])
+        if( cwMode !== mode ) {
+            setCwMode(mode);
+        }
+        if( ! IsEqualObject( data, cwData ) ) {
+            setCwData(data);
+        }
+    }, [mode, data]);
+
+    useEffect(() => {
+        if( ! IsEqualObject( data, cwData ) && typeof onDataChange === 'function' ) {
+            onDataChange( cwData );
+        }
+    }, [cwData])
 
     useEffect(() => {
         if( canvasRef.current && parentRef.current ) {
@@ -31,6 +40,7 @@ const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Pr
                 canvas: canvasRef.current,
                 mode: cwMode,
                 data: cwData,
+                onDataChange,
             });
         }
 
@@ -56,7 +66,7 @@ const ConvasWorkflow = ({ mode = 'editor', defaultData, data, onDataChange }: Pr
             strokeColor: '#ccc',
             borderRadius: 2,
         }
-        setCwData( { ...cwData, components: [ ...cwData?.components || [], comp ] })
+        setCwData( { ...cwData, components: [ ...cwData?.components || [], comp ] });
     }
 
     const clearAll = () => {

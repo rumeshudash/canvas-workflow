@@ -10,6 +10,7 @@ let debug = ! forceStopDebug && process.env.NODE_ENV === 'development';
 let parentDOM: HTMLDivElement;
 let canvasDOM: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D | null;
+let handleDataChange: ( data: CanvasData ) => void;
 let cwMode: 'editor' | 'viewer';
 
 let canvasDefaultData = {
@@ -33,6 +34,7 @@ interface InitCanvasProps {
     canvas: HTMLCanvasElement,
     mode?: 'editor' | 'viewer',
     data?: CanvasData,
+    onDataChange?: ( data: CanvasData ) => void
 }
 
 /**
@@ -49,19 +51,22 @@ export const InitCanvas = (
         canvas,
         mode,
         data,
+        onDataChange,
     } : InitCanvasProps
 ) => {
     parentDOM = parent;
     canvasDOM = canvas;
     cwMode = mode || 'editor';
-
     ctx = canvas.getContext("2d");
+    if( onDataChange ) {
+        handleDataChange = onDataChange;
+    }
 
     if( data ) {
         canvasData = data;
     }
     
-    canvasRender();
+    canvasRender( false );
     if( cwMode === 'editor' && canvasData?.components?.length ) {
         RegisterDraggable( canvasDOM, canvasData.components, canvasRender );
     } else {
@@ -96,8 +101,10 @@ export const ClearCanvas = () => {
 }
 
 const handleComponentSelect = ( event: CustomEvent ) => {
-    selectedIndex = event.detail.index;
-    canvasRender();
+    if( selectedIndex !== event.detail.index ) {
+        selectedIndex = event.detail.index;
+        canvasRender( false );
+    }
 }
 
 /**
@@ -108,7 +115,7 @@ const debouncRender = debounce( () => canvasRender() );
 /**
  * Main render function for canvas.
  */
-const canvasRender = ( ) => {
+const canvasRender = ( triggerDataChange = true ) => {
     if( parentDOM && canvasDOM && ctx ) {
         let parentDim = parentDOM.getBoundingClientRect();
         canvasDOM.width = parentDim.width;
@@ -133,6 +140,10 @@ const canvasRender = ( ) => {
         if( debug ) {
             TimeLogger.stop('Render');
             log('Render Completed');
+        }
+
+        if( triggerDataChange ) {
+            handleDataChange( canvasData );
         }
     }
 }
