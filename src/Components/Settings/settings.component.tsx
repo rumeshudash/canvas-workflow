@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { CANVAS_BG, CANVAS_COLOR_LIST, CANVAS_HEIGHT, FONT_FAMILY, MIN_CANVAS_HEIGHT } from '../../Constants/canvas.constants';
+import { CANVAS_BG, CANVAS_COLOR_LIST, CANVAS_HEIGHT, FONT_FAMILY, MIN_CANVAS_HEIGHT, STROKE_COLOR, TEXT_COLOR } from '../../Constants/canvas.constants';
 import { BoxComponent, CanvasComponent, CanvasData } from '../../Dtos/canvas.dtos';
 import { canvasRender } from '../../Utils/canvas.utils';
 import { getAvailableFontList, log } from '../../Utils/common.utils';
@@ -109,15 +109,12 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                 <div className='form-control'>
                                     <label>Background:</label>
                                     <ColorPicker 
+                                        type='fill'
                                         value={data.background || CANVAS_BG} 
                                         colors={CANVAS_COLOR_LIST}
                                         onChange={( value ) => handleDataChange( 'background',value ) } 
                                     />
                                 </div>
-                                {/* <div className='form-control'>
-                                    <label>Fill Color:</label>
-                                    <ColorPicker type='stroke' />
-                                </div> */}
                             </div>
                         </div>
                     </div>
@@ -128,7 +125,28 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                     <div className='section presentation'>
                         <div className='title'>Presentation</div>
                         <div className='controls'>
-
+                            { comp && comp.type === 'box' && <div>
+                                <div className='form-group'>
+                                    <div className='form-control'>
+                                        <label>Fill:</label>
+                                        <ColorPicker 
+                                            type='fill'
+                                            value={comp.fillColor || 'transparent'} 
+                                            colors={CANVAS_COLOR_LIST}
+                                            onChange={( value ) => handleComponentDataChange( 'fillColor',value ) } 
+                                        />
+                                    </div>
+                                    <div className='form-control'>
+                                        <label>Outline:</label>
+                                        <ColorPicker
+                                            type='stroke'
+                                            value={comp.strokeColor || STROKE_COLOR} 
+                                            colors={CANVAS_COLOR_LIST}
+                                            onChange={( value ) => handleComponentDataChange( 'strokeColor',value ) } 
+                                        />
+                                    </div>
+                                </div>
+                            </div>}
                         </div>
                     </div>
                     <div className='section text'>
@@ -164,6 +182,17 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                                 <option key={font} value={font}>{font}</option>
                                             ) ) }
                                         </select>
+                                    </div>
+                                </div>
+                                <div className='form-group'>
+                                    <div className='form-control'>
+                                        <label>Text Color:</label>
+                                        <ColorPicker
+                                            type='fill'
+                                            value={comp.textColor || TEXT_COLOR} 
+                                            colors={CANVAS_COLOR_LIST}
+                                            onChange={( value ) => handleComponentDataChange( 'textColor',value ) } 
+                                        />
                                     </div>
                                 </div>
                             </div>}
