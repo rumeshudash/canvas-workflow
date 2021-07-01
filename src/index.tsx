@@ -51,8 +51,8 @@ const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => 
     }, [canvasRef, parentRef, cwMode, cwData ])
 
     const addRandomBox = () => {
-        const randomX = Math.floor( Math.random() * ( canvasRef.current?.width || 100 ) );
-        const randomY = Math.floor( Math.random() * ( canvasRef.current?.height || 100 ) );
+        const randomX = Math.floor( Math.random() * ( canvasRef.current && parseInt( canvasRef.current.style.width ) || 100 ) );
+        const randomY = Math.floor( Math.random() * ( canvasRef.current && parseInt( canvasRef.current.style.height ) || 100 ) );
         // const randomRadius = Math.floor( Math.random() * 15 );
 
         const comp: BoxComponent = {

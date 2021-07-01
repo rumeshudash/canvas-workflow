@@ -1,4 +1,4 @@
-import { SELECTION_BOX_OFFSET } from "../Constants/canvas.constants";
+import { FONT_FAMILY, SELECTION_BOX_OFFSET } from "../Constants/canvas.constants";
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
 import { formatBorderRadius, getSelectionBoxCords, log } from "./common.utils";
 
@@ -31,7 +31,7 @@ export const drawBoxComponent = ( component: BoxComponent, canvasDefaultData: an
     ctx.clip(); // Clip inner elements inside box.
 
     // Draw box text.
-    ctx.font = `bold ${fontSize}px ${component.fontFamily}`;
+    ctx.font = `bold ${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
     ctx.fillStyle = component.textColor || canvasDefaultData.textColor;
     ctx.fillText(
         component.title, 
@@ -40,7 +40,7 @@ export const drawBoxComponent = ( component: BoxComponent, canvasDefaultData: an
     );
     
     if( component.description ) {
-        ctx.font = `${fontSize}px ${component.fontFamily}`;
+        ctx.font = `${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
         printAtWordWrap(
             ctx,
             component.description,
