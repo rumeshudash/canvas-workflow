@@ -15,9 +15,8 @@ const App = () => {
                 y: 100,
                 w: 150,
                 h: 100,
-                fillColor: '#ffffff',
                 lineWidth: 1,
-                borderRadius: 2,
+                fillColor: '#ffffff',
             }
         ]
     });

@@ -64,6 +64,7 @@
     "dist"
   ],
   "dependencies": {
+    "rc-slider": "^9.7.2",
     "react-color": "^2.19.3"
   }
 }

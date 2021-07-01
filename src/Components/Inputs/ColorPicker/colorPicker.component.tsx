@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useRef, useState } from 'react'
 import { SketchPicker, ColorResult } from 'react-color';
 import './colorPicker.component.scss';
 
@@ -24,8 +24,9 @@ const ColorPicker = ({ type = 'fill', colors, value = '#00000000', onChange }: C
         if( boxRef.current && popupRef.current ) {
             const boxBound = boxRef.current.getBoundingClientRect();
             popupRef.current.style.left = (boxBound.x + (boxBound.width / 2) - (pickerWidth / 2) - 5) + 'px';
+            popupRef.current.style.top = (boxBound.y + boxBound.height + 5) + 'px';
         }
-    }, [boxRef.current, popupRef.current]);
+    }, [boxRef.current, popupRef.current, showPopup]);
 
     const handleChange = ( color: ColorResult ) => {
         if( val !== color.hex && typeof onChange === 'function' ) {
@@ -56,14 +57,16 @@ const ColorPicker = ({ type = 'fill', colors, value = '#00000000', onChange }: C
             <div ref={boxRef} className='color-box' onClick={ () => setShowPopup( ! showPopup ) } style={colorBoxStyle}>
                 <div className='color-fill' style={colorFilStyle} />
             </div>
-            <div ref={popupRef} className={`popup ${! showPopup && 'hide' }`}>
-                <div className='popup-cover' onClick={ () => setShowPopup( false ) }/>
-                <SketchPicker
-                    color={val}
-                    presetColors={colors && colors}
-                    width={`${pickerWidth}px`} 
-                    onChange={handleChange}
-                />
+            <div ref={popupRef} className={`popup`}>
+                { showPopup && <Fragment>
+                    <div className='popup-cover' onClick={ () => setShowPopup( false ) }/>
+                    <SketchPicker
+                        color={val}
+                        presetColors={colors && colors}
+                        width={`${pickerWidth}px`} 
+                        onChange={handleChange}
+                    />
+                </Fragment>}
             </div>
         </div>
     )

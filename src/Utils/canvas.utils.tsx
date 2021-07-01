@@ -17,9 +17,6 @@ let cwMode: 'editor' | 'viewer';
 let canvasDefaultData = {
     selectionStrokeColor: '#7f7f7f',
     selectionLineWidth: 1,
-    lineWidth: 1,
-    fontSize: 16,
-    borderRadius: 3,
 }
 
 let canvasData: CanvasData = {}
