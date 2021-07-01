@@ -1,5 +1,5 @@
 import { BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { debounce, log } from "./common.utils";
+import { debounce, getDevicePixelRatio, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
 import { drawBoxComponent, drawSelectionHandle } from './draw.utils';
@@ -17,7 +17,8 @@ let cwMode: 'editor' | 'viewer';
 let canvasDefaultData = {
     background: '#f5f5f5',
     hoverColor: '#0000ff',
-    strokeColor: '#000000',
+    textColor: '#000000',
+    strokeColor: '#cccccc',
     selectionStrokeColor: '#7f7f7f',
     selectionLineWidth: 1,
     lineWidth: 1,
@@ -58,6 +59,7 @@ export const InitCanvas = (
     canvasDOM = canvas;
     cwMode = mode || 'editor';
     ctx = canvas.getContext("2d");
+
     if( onDataChange ) {
         handleDataChange = onDataChange;
     }
@@ -67,6 +69,7 @@ export const InitCanvas = (
     }
     
     canvasRender( false );
+
     if( cwMode === 'editor' && canvasData?.components?.length ) {
         RegisterDraggable( canvasDOM, canvasData.components, canvasRender );
     } else {
@@ -118,9 +121,15 @@ const debouncRender = debounce( () => canvasRender() );
 export const canvasRender = ( triggerDataChange = true ) => {
     if( parentDOM && canvasDOM && ctx ) {
         let parentDim = parentDOM.getBoundingClientRect();
-        canvasDOM.width = parentDim.width;
-        canvasDOM.height = canvasData.height || CANVAS_HEIGHT;
-    
+        let pixelRatio = getDevicePixelRatio( ctx ); // Device pixel ratio.
+
+        // Manage pixel ratio of canvas according to device pixel ratio.
+        canvasDOM.width = parentDim.width * pixelRatio;
+        canvasDOM.height = ( canvasData.height || CANVAS_HEIGHT ) * pixelRatio;
+        canvasDOM.style.width = parentDim.width + "px";
+        canvasDOM.style.height = ( canvasData.height || CANVAS_HEIGHT ) + "px";
+        ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
         ClearCanvas();
     
         if( debug ) {

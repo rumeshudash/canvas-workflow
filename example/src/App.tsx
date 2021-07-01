@@ -9,16 +9,15 @@ const App = () => {
         components:[
             { 
                 type: 'box',
-                title: 'Rumesh',
-                description: 'Hello my name is rumesh udash',
+                title: 'Begin',
+                description: 'Begin',
                 x: 100,
                 y: 100,
                 w: 150,
                 h: 100,
-                fillColor: 'red',
-                strokeColor: 'green',
+                fillColor: '#ffffff',
                 lineWidth: 1,
-                borderRadius: 5,
+                borderRadius: 2,
             }
         ]
     });

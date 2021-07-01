@@ -26,21 +26,22 @@ export const drawBoxComponent = ( component: BoxComponent, canvasDefaultData: an
 
     // Draw box stroke or border.
     ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
-    ctx.strokeStyle = component.strokeColor || component.fillColor || canvasDefaultData.strokeColor;
+    ctx.strokeStyle = component.strokeColor || canvasDefaultData.strokeColor;
     ctx.stroke();
     ctx.clip(); // Clip inner elements inside box.
 
     // Draw box text.
-    ctx.font = `${fontSize}px ${component.fontFamily}`;
-    ctx.fillStyle = component.textColor || canvasDefaultData.strokeColor;
-    ctx.fillText( 
+    ctx.font = `bold ${fontSize}px ${component.fontFamily}`;
+    ctx.fillStyle = component.textColor || canvasDefaultData.textColor;
+    ctx.fillText(
         component.title, 
         component.x + padding + ctx.lineWidth, 
         component.y + padding + fontSize + ctx.lineWidth - 5,
     );
     
     if( component.description ) {
-        printAtWordWrap( 
+        ctx.font = `${fontSize}px ${component.fontFamily}`;
+        printAtWordWrap(
             ctx,
             component.description,
             component.x + padding + ctx.lineWidth,
