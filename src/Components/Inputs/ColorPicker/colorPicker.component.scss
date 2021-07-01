@@ -1,0 +1,38 @@
+@import './../../../Constants/variables.scss';
+
+.color-picker {
+    display: inline-block;
+    // position: relative;
+
+    .color-box {
+        display: inline-block;
+        padding: 3px;
+        background: #fff;
+        border-radius: 2px;
+        box-shadow: 0 0 0 1px rgba(0,0,0,.1);
+        inset: 0px;
+        cursor: pointer;
+
+        .color-fill {
+            width: 30px;
+            height: 30px;
+            background: $settingsBG;
+            border-radius: 2px;
+        }
+    }
+
+    .popup {
+        position: absolute;
+        z-index: 2;
+        .popup-cover {
+            position: fixed;
+            top: 0px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+        }
+        &.hide {
+            display: none;
+        }
+    }
+}

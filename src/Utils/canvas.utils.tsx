@@ -3,7 +3,7 @@ import { debounce, getDevicePixelRatio, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
 import { drawBoxComponent, drawSelectionHandle } from './draw.utils';
-import { CANVAS_HEIGHT } from "../Constants/canvas.constants";
+import { CANVAS_BG, CANVAS_HEIGHT } from "../Constants/canvas.constants";
 
 let forceStopDebug = true;
 let debug = ! forceStopDebug && process.env.NODE_ENV === 'development';
@@ -15,7 +15,6 @@ let handleDataChange: ( data: CanvasData ) => void;
 let cwMode: 'editor' | 'viewer';
 
 let canvasDefaultData = {
-    background: '#f5f5f5',
     hoverColor: '#0000ff',
     textColor: '#000000',
     strokeColor: '#cccccc',
@@ -162,7 +161,7 @@ export const canvasRender = ( triggerDataChange = true ) => {
 const setCanvasBG = () => {
     if( canvasDOM && ctx ) {
         ctx.translate(0.5, 0.5); // Smoothening canvas.
-        ctx.fillStyle = canvasData.background || canvasDefaultData.background;
+        ctx.fillStyle = canvasData.background || CANVAS_BG;
         ctx.fillRect(0, 0, canvasDOM.width, canvasDOM.height);
     }
 }

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { CANVAS_HEIGHT, FONT_FAMILY, MIN_CANVAS_HEIGHT } from '../../Constants/canvas.constants';
+import { CANVAS_BG, CANVAS_COLOR_LIST, CANVAS_HEIGHT, FONT_FAMILY, MIN_CANVAS_HEIGHT } from '../../Constants/canvas.constants';
 import { BoxComponent, CanvasComponent, CanvasData } from '../../Dtos/canvas.dtos';
 import { canvasRender } from '../../Utils/canvas.utils';
-import Textarea from '../Inputs/Textarea/textarea.component';
 import { getAvailableFontList, log } from '../../Utils/common.utils';
-import './settings.component.scss';
+import Textarea from '../Inputs/Textarea/textarea.component';
 import NumberInput from '../Inputs/NumberInput/numberInput.component';
+import './settings.component.scss';
+import ColorPicker from '../Inputs/ColorPicker/colorPicker.component';
 
 interface SettingsProps {
     data: CanvasData;
@@ -77,9 +78,7 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
 
     const handleComponentDataChange = ( key: string, value: any ) => {
         if( selection !== -1 && comp ) {
-            // if( Object.keys( comp ).includes( key ) ) {
-                comp[key] = value;
-            // }
+            comp[key] = value;
 
             if( data.components ) {
                 data.components[selection] = comp;
@@ -105,6 +104,20 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                         onBlur={( value ) => handleDataChange( 'height',value )}
                                     />
                                 </div>
+                            </div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Background:</label>
+                                    <ColorPicker 
+                                        value={data.background || CANVAS_BG} 
+                                        colors={CANVAS_COLOR_LIST}
+                                        onChange={( value ) => handleDataChange( 'background',value ) } 
+                                    />
+                                </div>
+                                {/* <div className='form-control'>
+                                    <label>Fill Color:</label>
+                                    <ColorPicker type='stroke' />
+                                </div> */}
                             </div>
                         </div>
                     </div>
