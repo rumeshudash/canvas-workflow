@@ -139,6 +139,23 @@ export const getSelectionBoxCords = ( compDimension: { x: number, y: number, w: 
 }
 
 /**
+ * Get Device pixel ratio.
+ * 
+ * @param ctx Canvas Rendering Context 2D.
+ * @returns number
+ */
+export const getDevicePixelRatio = ( ctx: CanvasRenderingContext2D ) => {
+    let dpr = window.devicePixelRatio || 1,
+        bsr = ( ctx as any ).webkitBackingStorePixelRatio ||
+            ( ctx as any ).mozBackingStorePixelRatio ||
+            ( ctx as any ).msBackingStorePixelRatio ||
+            ( ctx as any ).oBackingStorePixelRatio ||
+            ( ctx as any ).backingStorePixelRatio || 1;
+
+    return dpr / bsr;
+};
+
+/**
  * Custom Log with tag.
  * 
  * @param message Any values to log.

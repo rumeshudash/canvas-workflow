@@ -38,8 +38,6 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     const handleSelectionChange = ( event: CustomEvent ) => {
         setSelection( -1 );
         setSelection( event.detail.index );
-
-        // setComponent()
         setComponent( event.detail.component );
     }
 
