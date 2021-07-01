@@ -1,7 +1,6 @@
 export interface CanvasData {
     height?: number,
     background?: string,
-    hoverColor?: string,
     selectionStrokeColor?: string,
     selectionLineWidth?: number,
     components?: CanvasComponent[],

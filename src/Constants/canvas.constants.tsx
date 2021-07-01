@@ -5,7 +5,8 @@ export const CANVAS_BG = '#f5f5f5';
 export const CANVAS_COLOR_LIST = [ 
     '#ffffff', 
     '#f5f5f5', 
-    '#D9E3F0', 
+    '#D9E3F0',
+    '#cccccc', 
     '#697689', 
     '#555555', 
     '#ff8a65', 
@@ -34,3 +35,5 @@ export const BOX_MIN_WIDTH = 50;
 export const BOX_MIN_HEIGHT = 50;
 
 export const FONT_FAMILY = 'Arial';
+export const TEXT_COLOR = '#000000';
+export const STROKE_COLOR = '#cccccc';

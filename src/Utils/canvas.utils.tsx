@@ -15,9 +15,6 @@ let handleDataChange: ( data: CanvasData ) => void;
 let cwMode: 'editor' | 'viewer';
 
 let canvasDefaultData = {
-    hoverColor: '#0000ff',
-    textColor: '#000000',
-    strokeColor: '#cccccc',
     selectionStrokeColor: '#7f7f7f',
     selectionLineWidth: 1,
     lineWidth: 1,

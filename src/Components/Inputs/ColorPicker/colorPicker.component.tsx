@@ -60,7 +60,7 @@ const ColorPicker = ({ type = 'fill', colors, value = '#00000000', onChange }: C
                 <div className='popup-cover' onClick={ () => setShowPopup( false ) }/>
                 <SketchPicker
                     color={val}
-                    presetColors={colors}
+                    presetColors={colors && colors}
                     width={`${pickerWidth}px`} 
                     onChange={handleChange}
                 />

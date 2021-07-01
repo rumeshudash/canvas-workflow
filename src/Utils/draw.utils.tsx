@@ -1,4 +1,4 @@
-import { FONT_FAMILY, SELECTION_BOX_OFFSET } from "../Constants/canvas.constants";
+import { FONT_FAMILY, SELECTION_BOX_OFFSET, STROKE_COLOR, TEXT_COLOR } from "../Constants/canvas.constants";
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
 import { formatBorderRadius, getSelectionBoxCords, log } from "./common.utils";
 
@@ -20,19 +20,19 @@ export const drawBoxComponent = ( component: BoxComponent, canvasDefaultData: an
     drawRoundedRect( ctx, component.x, component.y, component.w, component.h, component.borderRadius || canvasDefaultData.borderRadius );
     if( component.fillColor ) {
         // Draw box fill
-        ctx.fillStyle = component.fillColor;
+        ctx.fillStyle = component.fillColor || 'transparent';
         ctx.fill();
     }
 
     // Draw box stroke or border.
     ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
-    ctx.strokeStyle = component.strokeColor || canvasDefaultData.strokeColor;
+    ctx.strokeStyle = component.strokeColor || STROKE_COLOR;
     ctx.stroke();
     ctx.clip(); // Clip inner elements inside box.
 
     // Draw box text.
     ctx.font = `bold ${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
-    ctx.fillStyle = component.textColor || canvasDefaultData.textColor;
+    ctx.fillStyle = component.textColor || TEXT_COLOR;
     ctx.fillText(
         component.title, 
         component.x + padding + ctx.lineWidth, 
