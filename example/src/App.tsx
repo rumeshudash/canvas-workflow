@@ -24,13 +24,11 @@ const App = () => {
 
     const dataChangeHandle = ( data: CanvasData ) => {
         setData( data );
-        console.log( data );
     }
 
     return (
         <div>
             <CanvasWorkflow mode='editor' data={data} onDataChange={dataChangeHandle} />
-            {/* <CanvasWorkflow mode='viewer' data={data} /> */}
         </div>
     )
 }

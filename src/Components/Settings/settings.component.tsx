@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { CANVAS_HEIGHT } from '../../Constants/canvas.constants';
+import { CANVAS_HEIGHT, FONT_FAMILY, MIN_CANVAS_HEIGHT } from '../../Constants/canvas.constants';
 import { BoxComponent, CanvasComponent, CanvasData } from '../../Dtos/canvas.dtos';
 import { canvasRender } from '../../Utils/canvas.utils';
-import { log } from '../../Utils/common.utils';
-import Textarea from '../Textarea/textarea.component';
+import Textarea from '../Inputs/Textarea/textarea.component';
+import { getAvailableFontList, log } from '../../Utils/common.utils';
 import './settings.component.scss';
+import NumberInput from '../Inputs/NumberInput/numberInput.component';
 
 interface SettingsProps {
     data: CanvasData;
@@ -15,6 +16,14 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
 
     const [selection, setSelection] = useState<number>(-1);
     const [component, setComponent] = useState<CanvasComponent>();
+    const [height, setHeight] = useState( data.height || CANVAS_HEIGHT );
+    const [fonts, setFonts] = useState<string[]>([]);
+
+    useEffect(() => {
+        // List of available fonts.
+        setFonts(getAvailableFontList());
+
+    }, [])
 
     useEffect(() => {
         if( canvasRef.current ) {
@@ -54,10 +63,23 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     }
     
     const handleDataChange = ( key: string, value: any ) => {
-        if( selection !== -1 && comp ) {
-            if( Object.keys( comp ).includes( key ) ) {
-                comp[key] = value;
+        data[key] = value;
+        if( key === 'height' ) {
+            if( value && value < MIN_CANVAS_HEIGHT ) {
+                data[key] = MIN_CANVAS_HEIGHT;
+            } else if( ! value ) {
+                data[key] = CANVAS_HEIGHT;
             }
+            setHeight( data[key] || CANVAS_HEIGHT );
+        }
+        canvasRender();
+    }
+
+    const handleComponentDataChange = ( key: string, value: any ) => {
+        if( selection !== -1 && comp ) {
+            // if( Object.keys( comp ).includes( key ) ) {
+                comp[key] = value;
+            // }
 
             if( data.components ) {
                 data.components[selection] = comp;
@@ -67,7 +89,27 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     }
 
     return (
-        <div className='cw-settings' style={{ height: data.height || CANVAS_HEIGHT }}>
+        <div className='cw-settings' style={{ height: height }}>
+            { selection === -1 &&
+                <div className='canvas-settings'>
+                    <div className='section presentation'>
+                        <div className='title'>Canvas Settings</div>
+                        <div className='controls'>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Height:</label>
+                                    <NumberInput
+                                        placeholder='Height'
+                                        min={MIN_CANVAS_HEIGHT}
+                                        value={data.height || CANVAS_HEIGHT}
+                                        onBlur={( value ) => handleDataChange( 'height',value )}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
             { selection !== -1 && 
                 <div className='component-settings'>
                     <div className='section presentation'>
@@ -87,7 +129,7 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                             type='text' 
                                             placeholder='Title'
                                             defaultValue={comp.title}
-                                            onChange={(e) => handleDataChange( 'title', e.target.value )}
+                                            onChange={(e) => handleComponentDataChange( 'title', e.target.value )}
                                         />
                                     </div>
                                 </div>
@@ -97,8 +139,18 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                         <Textarea 
                                             placeholder='Description' 
                                             value={comp.description} 
-                                            onChange={(value) => handleDataChange( 'description', value )} 
+                                            onChange={(value) => handleComponentDataChange( 'description', value )} 
                                         />
+                                    </div>
+                                </div>
+                                <div className='form-group'>
+                                    <div className='form-control'>
+                                        <label>Font Family:</label>
+                                        <select defaultValue={comp.fontFamily || FONT_FAMILY} onChange={( e ) => handleComponentDataChange( 'fontFamily', e.target.value ) }>
+                                            { fonts.length > 0 && fonts.map( ( font ) => (
+                                                <option key={font} value={font}>{font}</option>
+                                            ) ) }
+                                        </select>
                                     </div>
                                 </div>
                             </div>}

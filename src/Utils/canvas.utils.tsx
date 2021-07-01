@@ -23,7 +23,6 @@ let canvasDefaultData = {
     selectionLineWidth: 1,
     lineWidth: 1,
     fontSize: 16,
-    fontFamily: 'Arial',
     borderRadius: 3,
 }
 
