@@ -1,6 +1,6 @@
 import { BOX_MIN_HEIGHT, BOX_MIN_WIDTH, SELECTION_RESIZE_BOX_CURSORS } from "../Constants/canvas.constants";
 import { BoxComponent, CanvasComponent } from "../Dtos/canvas.dtos";
-import { getSelectionBoxCords, log, reversedIndexOf } from "./common.utils";
+import { getSelectionBoxCords, reversedIndexOf } from "./common.utils";
 
 let cwRender: Function;
 let canvasDOM: HTMLCanvasElement;
@@ -249,8 +249,8 @@ const onMouseUp = (): void => {
  * @param event KeyboardEvent
  */
 const onKeyDown = ( event: KeyboardEvent ): void => {
-    event.preventDefault();
     if( event.key === ' ' && ! listenMovingCanvas ) {
+        event.preventDefault();
         canvasDOM.style.cursor = 'grab'
         listenMovingCanvas = true;
     } 

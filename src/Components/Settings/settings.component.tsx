@@ -1,12 +1,28 @@
 import React, { useEffect, useState } from 'react'
-import { CANVAS_BG, CANVAS_COLOR_LIST, CANVAS_HEIGHT, FONT_FAMILY, MIN_CANVAS_HEIGHT, STROKE_COLOR, TEXT_COLOR } from '../../Constants/canvas.constants';
+import { 
+    CANVAS_BG, 
+    CANVAS_COLOR_LIST, 
+    CANVAS_HEIGHT, 
+    FONT_FAMILY, 
+    FONT_SIZE, 
+    MIN_CANVAS_HEIGHT, 
+    MIN_FONT_SIZE, 
+    MAX_FONT_SIZE, 
+    STROKE_COLOR, 
+    TEXT_COLOR, 
+    BORDER_RADIUS, 
+    MAX_BORDER_RADIUS, 
+    LINE_WIDTH, 
+    MAX_LINE_WIDTH 
+} from '../../Constants/canvas.constants';
 import { BoxComponent, CanvasComponent, CanvasData } from '../../Dtos/canvas.dtos';
 import { canvasRender } from '../../Utils/canvas.utils';
-import { getAvailableFontList, log } from '../../Utils/common.utils';
+import { getAvailableFontList } from '../../Utils/common.utils';
 import Textarea from '../Inputs/Textarea/textarea.component';
 import NumberInput from '../Inputs/NumberInput/numberInput.component';
-import './settings.component.scss';
 import ColorPicker from '../Inputs/ColorPicker/colorPicker.component';
+import SliderInput from '../Inputs/SliderInput/sliderInput.component';
+import './settings.component.scss';
 
 interface SettingsProps {
     data: CanvasData;
@@ -77,11 +93,13 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     }
 
     const handleComponentDataChange = ( key: string, value: any ) => {
-        if( selection !== -1 && comp ) {
-            comp[key] = value;
+        if( selection !== -1 ) {
+            if( data.components && data.components[selection] ) {
+                const newComponent = { ...data.components[selection] }
+                newComponent[key] = value;
+                data.components[selection] = newComponent;
 
-            if( data.components ) {
-                data.components[selection] = comp;
+                setComponent( data.components[selection] );
                 canvasRender();
             }
         }
@@ -96,23 +114,23 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                         <div className='controls'>
                             <div className='form-group'>
                                 <div className='form-control'>
-                                    <label>Height:</label>
-                                    <NumberInput
-                                        placeholder='Height'
-                                        min={MIN_CANVAS_HEIGHT}
-                                        value={data.height || CANVAS_HEIGHT}
-                                        onBlur={( value ) => handleDataChange( 'height',value )}
-                                    />
-                                </div>
-                            </div>
-                            <div className='form-group'>
-                                <div className='form-control'>
                                     <label>Background:</label>
                                     <ColorPicker 
                                         type='fill'
                                         value={data.background || CANVAS_BG} 
                                         colors={CANVAS_COLOR_LIST}
                                         onChange={( value ) => handleDataChange( 'background',value ) } 
+                                    />
+                                </div>
+                            </div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Height:</label>
+                                    <NumberInput
+                                        placeholder='Height'
+                                        min={MIN_CANVAS_HEIGHT}
+                                        value={data.height || CANVAS_HEIGHT}
+                                        onBlur={( value ) => handleDataChange( 'height',value )}
                                     />
                                 </div>
                             </div>
@@ -146,6 +164,27 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                         />
                                     </div>
                                 </div>
+                                <div className='form-group'>
+                                    <div className='form-control'>
+                                        <label>Outline Width: <strong>{ comp.lineWidth || BORDER_RADIUS } px</strong></label>
+                                        <SliderInput
+                                            value={ comp.lineWidth || LINE_WIDTH } 
+                                            min={1}
+                                            max={MAX_LINE_WIDTH}
+                                            onAfterChange={( value ) => handleComponentDataChange( 'lineWidth', value )}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='form-group'>
+                                    <div className='form-control'>
+                                        <label>Border Radius: <strong>{ typeof comp.borderRadius !== 'undefined' ? comp.borderRadius : BORDER_RADIUS } px</strong></label>
+                                        <SliderInput
+                                            value={ typeof comp.borderRadius !== 'undefined' ? comp.borderRadius : BORDER_RADIUS } 
+                                            max={MAX_BORDER_RADIUS}
+                                            onAfterChange={( value ) => handleComponentDataChange( 'borderRadius', value )}
+                                        />
+                                    </div>
+                                </div>
                             </div>}
                         </div>
                     </div>
@@ -171,6 +210,17 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                             placeholder='Description' 
                                             value={comp.description} 
                                             onChange={(value) => handleComponentDataChange( 'description', value )} 
+                                        />
+                                    </div>
+                                </div>
+                                <div className='form-group'>
+                                    <div className='form-control'>
+                                        <label>Font Size: <strong>{comp.fontSize || FONT_SIZE}px</strong></label>
+                                        <SliderInput
+                                            value={comp.fontSize || FONT_SIZE} 
+                                            min={MIN_FONT_SIZE}
+                                            max={MAX_FONT_SIZE}
+                                            onAfterChange={( value ) => handleComponentDataChange( 'fontSize', value )}
                                         />
                                     </div>
                                 </div>

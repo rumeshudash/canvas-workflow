@@ -85,8 +85,14 @@ export const reversedIndexOf = ( arr: any[], item: any): number => {
  * @returns BorderRadiusBase
  */
 export const formatBorderRadius = ( borderRadius?: BorderRadius ): BorderRadiusBase => {
+    const defaultBorder = { tl: 0, tr: 0, br: 0, bl: 0 };
+
+    if( typeof borderRadius === 'undefined' ) {
+        return defaultBorder;
+    }
+
     if( typeof borderRadius !== 'number' ) {
-        return { ...{ tl: 0, tr: 0, br: 0, bl: 0 }, ...borderRadius };
+        return { ...defaultBorder, ...borderRadius };
     }
     
     return { 
