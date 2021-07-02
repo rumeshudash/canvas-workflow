@@ -1,11 +1,13 @@
 import { BOX_MIN_HEIGHT, BOX_MIN_WIDTH, SELECTION_RESIZE_BOX_CURSORS } from "../Constants/canvas.constants";
 import { BoxComponent, CanvasComponent } from "../Dtos/canvas.dtos";
-import { getSelectionBoxCords, reversedIndexOf } from "./common.utils";
+import { getDefaultBoxData, getSelectionBoxCords, reversedIndexOf } from "./common.utils";
 
 let cwRender: Function;
 let canvasDOM: HTMLCanvasElement;
 let cwComponents: CanvasComponent[];
 let tempComponents: CanvasComponent[];
+
+let removeComponent: ( index: number ) => void;
 
 let isDragging = false;
 let isResizing = false;
@@ -26,15 +28,18 @@ let prevCursorPos = {x: 0, y: 0};
  * @param components Component array
  * @param render Render function of canvas.
  */
-export const RegisterDraggable = ( canvas: HTMLCanvasElement, components: CanvasComponent[], render: Function ): void => {
+export const RegisterDraggable = ( canvas: HTMLCanvasElement, components: CanvasComponent[] = [], render: Function, RemoveComponent: ( index: number ) => void ): void => {
     cwComponents = components;
     canvasDOM = canvas;
     cwRender = render;
+    removeComponent = RemoveComponent;
 
     canvasDOM.addEventListener('mousedown', onMouseDown );
     canvasDOM.addEventListener('mousemove', onMouseMove );
     canvasDOM.addEventListener('keydown', onKeyDown );
     canvasDOM.addEventListener('keyup', onKeyUp );
+    canvasDOM.addEventListener('drop', onDrop );
+    canvasDOM.addEventListener('dragover', allowDrop );
 }
 
 /**
@@ -45,6 +50,7 @@ export const DestroyDraggable = (): void => {
         canvasDOM.removeEventListener('mousedown', onMouseDown );
         canvasDOM.removeEventListener('mousemove', onMouseMove );
         canvasDOM.removeEventListener('keypress', onKeyDown );
+        canvasDOM.removeEventListener('dragover', allowDrop );
     }
 }
 
@@ -54,7 +60,7 @@ export const DestroyDraggable = (): void => {
  * @param event MouseEvent
  */
 const onMouseDown = ( event: MouseEvent ): void => {
-    if( ! cwComponents.length ) return;
+    // if( ! cwComponents.length ) return;
 
     const canvasEvent = getCanvasCursorPos( event );
 
@@ -187,6 +193,7 @@ const onMouseMove = ( event: MouseEvent ): void => {
 
         cwRender();
     } else {
+        canvasDOM.style.cursor = 'default';
         cwComponents.every( ( comp, index ) => {
             let compDimension = {
                 x: comp.x,
@@ -207,8 +214,6 @@ const onMouseMove = ( event: MouseEvent ): void => {
                 canvasDOM.style.cursor = 'move'; // On hover over draggable box.
                 return false;
             }
-
-            canvasDOM.style.cursor = 'default';
 
             let selectionBoxActive = false;
             if( index === dragCompIndex ) {
@@ -253,7 +258,15 @@ const onKeyDown = ( event: KeyboardEvent ): void => {
         event.preventDefault();
         canvasDOM.style.cursor = 'grab'
         listenMovingCanvas = true;
-    } 
+    } if( ( event.key.toLowerCase() === 'delete' || event.key.toLowerCase() === 'backspace' ) && dragCompIndex !== -1 ) {
+        event.preventDefault();
+        const tempIndex = dragCompIndex;
+        dragCompIndex = -1;
+        setTimeout( () => {
+            removeComponent( tempIndex );
+            triggerComponentSelect();
+        }, 100 )
+    }
 }
 
 /**
@@ -268,6 +281,33 @@ const onKeyUp = ( event: KeyboardEvent ): void => {
         tempComponents = [];
         canvasDOM.style.cursor = 'default'
     }
+}
+
+/**
+ * Allow drop over canvas.
+ * 
+ * @param ev Event
+ */
+const allowDrop = ( event: any ): any => {
+    event.preventDefault();
+} 
+
+const onDrop = ( event: any ) => {
+    event.preventDefault();
+    if( event.dataTransfer ) {
+        const id = event.dataTransfer.getData('id');
+        const cursorPos = getCanvasCursorPos( event );
+
+        switch( id ) {
+            case 'box':
+                const length = cwComponents.push( getDefaultBoxData( cursorPos.x, cursorPos.y ) );
+                dragCompIndex = length - 1;
+                triggerComponentSelect();
+                cwRender();
+                break;
+        }
+    }
+
 }
 
 /**

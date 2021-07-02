@@ -27,6 +27,7 @@ interface InitCanvasProps {
     canvas: HTMLCanvasElement,
     mode?: 'editor' | 'viewer',
     data?: CanvasData,
+    updateData?: ( data: CanvasData ) => void,
     onDataChange?: ( data: CanvasData ) => void
 }
 
@@ -62,8 +63,8 @@ export const InitCanvas = (
     
     canvasRender( false );
 
-    if( cwMode === 'editor' && canvasData?.components?.length ) {
-        RegisterDraggable( canvasDOM, canvasData.components, canvasRender );
+    if( cwMode === 'editor' && canvasData ) {
+        RegisterDraggable( canvasDOM, canvasData.components, canvasRender, RemoveComponent );
     } else {
         DestroyDraggable();
     }
@@ -76,10 +77,20 @@ export const InitCanvas = (
  */
 export const DestroyCanvas = () => {
     window.removeEventListener( 'resize', debouncRender );
-    canvasDOM.removeEventListener( 'cwComponentSelected', handleComponentSelect );
     DestroyDraggable();
     if( debug ) {
         log('Canvas Destroyed');
+    }
+}
+
+export const RemoveComponent = ( index: number ) => {
+    if( canvasData?.components ) {
+        let tempData = { ...canvasData };
+        tempData.components = tempData.components?.filter( ( _, i ) => {
+            return i !== index;
+        } );
+        canvasData = tempData;
+        handleDataChange( tempData );
     }
 }
 

@@ -1,7 +1,8 @@
 import React, { createRef, useEffect, useState } from 'react'
 import { BoxComponent, CanvasData } from './Dtos/canvas.dtos';
 import { DestroyCanvas, InitCanvas } from './Utils/canvas.utils';
-import { IsEqualObject, log } from './Utils/common.utils';
+import { IsEqualObject } from './Utils/common.utils';
+import Toolbar from './Components/Toolbar/toolbar.component';
 import Settings from './Components/Settings/settings.component';
 import './styles.scss'
 
@@ -14,7 +15,7 @@ interface Props {
 const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => {
 
     const [cwMode, setCwMode] = useState(mode);
-    const [cwData, setCwData] = useState<CanvasData>(data);
+    const [cwData, setCwData] = useState<CanvasData>({});
 
     const canvasRef = createRef<HTMLCanvasElement>();
     const parentRef = createRef<HTMLDivElement>();
@@ -27,12 +28,6 @@ const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => 
             setCwData(data);
         }
     }, [mode, data]);
-
-    useEffect(() => {
-        if( ! IsEqualObject( data, cwData ) && typeof onDataChange === 'function' ) {
-            onDataChange( cwData );
-        }
-    }, [cwData])
 
     useEffect(() => {
         if( canvasRef.current && parentRef.current ) {
@@ -48,7 +43,7 @@ const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => 
         return () => {
             DestroyCanvas();
         }
-    }, [canvasRef, parentRef, cwMode, cwData ])
+    }, [canvasRef, parentRef, cwMode, cwData, cwData.components ])
 
     const addRandomBox = () => {
         const randomX = Math.floor( Math.random() * ( canvasRef.current && parseInt( canvasRef.current.style.width ) || 100 ) );
@@ -76,11 +71,7 @@ const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => 
 
     return (
         <div className={`canvas-workflow`} >
-            <div className='cw-tools'>
-                <div className=''>
-                    <div>Tool Box</div>
-                </div>
-            </div>
+            <Toolbar />
             <div className='cw-wrapper' ref={parentRef}>
                 <canvas ref={canvasRef} tabIndex={1}></canvas>
             </div>

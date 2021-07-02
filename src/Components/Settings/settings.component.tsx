@@ -53,7 +53,7 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                 // canvasRef.current.removeEventListener('cwComponentMoving', handleComponentMoving );
             }
         }
-    }, [ canvasRef, selection ])
+    }, [ canvasRef.current, selection ])
 
     useEffect(() => {
         if( selection !== -1 && data.components && ! data.components[selection] ) {
@@ -64,6 +64,7 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     const handleSelectionChange = ( event: CustomEvent ) => {
         setSelection( -1 );
         setSelection( event.detail.index );
+        setComponent( undefined );
         setComponent( event.detail.component );
     }
 
