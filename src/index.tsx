@@ -15,7 +15,7 @@ interface Props {
 const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => {
 
     const [cwMode, setCwMode] = useState(mode);
-    const [cwData, setCwData] = useState<CanvasData>(data);
+    const [cwData, setCwData] = useState<CanvasData>({});
 
     const canvasRef = createRef<HTMLCanvasElement>();
     const parentRef = createRef<HTMLDivElement>();
@@ -28,12 +28,6 @@ const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => 
             setCwData(data);
         }
     }, [mode, data]);
-
-    useEffect(() => {
-        if( ! IsEqualObject( data, cwData ) && typeof onDataChange === 'function' ) {
-            onDataChange( cwData );
-        }
-    }, [cwData])
 
     useEffect(() => {
         if( canvasRef.current && parentRef.current ) {
@@ -49,7 +43,7 @@ const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => 
         return () => {
             DestroyCanvas();
         }
-    }, [canvasRef, parentRef, cwMode, cwData ])
+    }, [canvasRef, parentRef, cwMode, cwData, cwData.components ])
 
     const addRandomBox = () => {
         const randomX = Math.floor( Math.random() * ( canvasRef.current && parseInt( canvasRef.current.style.width ) || 100 ) );

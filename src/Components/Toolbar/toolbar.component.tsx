@@ -1,16 +1,20 @@
 import React from 'react'
-import boxImg from '../../Assets/Images/workflow-box.png';
-import { loadAsset } from '../../Utils/common.utils';
+import { ReactComponent as BoxSvg } from '../../Assets/Images/workflowBox.svg'  ;
 import './toolbar.component.scss';
 
 const Toolbar = () => {
+
+    const handleDragStart = ( event: any ) => {
+        event.dataTransfer.setData("id", event.target.id );
+    }
+
     return (
         <div className='cw-toolbar'>
             <div className='toolbar-standard'>
-                <div className='header'>Standard Shapes</div>
+                <div className='title'>Standard Shapes</div>
                 <div className='tools'>
-                    <div className='tool-item'>
-                        <img src={ loadAsset(boxImg) } alt='box' />
+                    <div id='box' className='tool-item' draggable="true" onDragStart={ handleDragStart }>
+                        <BoxSvg/>
                     </div>
                 </div>
             </div>

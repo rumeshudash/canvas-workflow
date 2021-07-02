@@ -247,11 +247,25 @@ export const log = ( ...message: any[] ): void => {
     console.log( logTag, ...message );
 }
 
-export const loadAsset = (asset: string) => {
-    try {
-        if (asset.includes('static')) return asset;
-        return require(`./${asset}`);
-    } catch (error) {
-        return asset;
+export const getDefaultBoxData = ( x?: number, y?: number ) => {
+    let boxData = { 
+        type: 'box',
+        title: 'Workflow',
+        description: 'Your workflow description here.',
+        x: 100,
+        y: 100,
+        w: 150,
+        h: 100,
+        lineWidth: 1,
+        fillColor: '#ffffff',
+    };
+
+    if( typeof x !== 'undefined' ) {
+        boxData.x = x - ( boxData.w / 2 );
     }
-};
+    if( typeof y !== 'undefined' ) {
+        boxData.y = y - ( boxData.h / 2 );
+    }
+
+    return boxData;
+}
