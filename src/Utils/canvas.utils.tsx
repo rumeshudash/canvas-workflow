@@ -1,8 +1,9 @@
 import { BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { debounce, log } from "./common.utils";
+import { debounce, getDevicePixelRatio, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
 import { drawBoxComponent, drawSelectionHandle } from './draw.utils';
+import { CANVAS_BG, CANVAS_HEIGHT } from "../Constants/canvas.constants";
 
 let forceStopDebug = true;
 let debug = ! forceStopDebug && process.env.NODE_ENV === 'development';
@@ -14,16 +15,8 @@ let handleDataChange: ( data: CanvasData ) => void;
 let cwMode: 'editor' | 'viewer';
 
 let canvasDefaultData = {
-    height: 500,
-    background: '#f5f5f5',
-    hoverColor: '#0000ff',
-    strokeColor: '#000000',
     selectionStrokeColor: '#7f7f7f',
     selectionLineWidth: 1,
-    lineWidth: 1,
-    fontSize: 16,
-    fontFamily: 'Arial',
-    borderRadius: 3,
 }
 
 let canvasData: CanvasData = {}
@@ -58,6 +51,7 @@ export const InitCanvas = (
     canvasDOM = canvas;
     cwMode = mode || 'editor';
     ctx = canvas.getContext("2d");
+
     if( onDataChange ) {
         handleDataChange = onDataChange;
     }
@@ -67,6 +61,7 @@ export const InitCanvas = (
     }
     
     canvasRender( false );
+
     if( cwMode === 'editor' && canvasData?.components?.length ) {
         RegisterDraggable( canvasDOM, canvasData.components, canvasRender );
     } else {
@@ -115,12 +110,18 @@ const debouncRender = debounce( () => canvasRender() );
 /**
  * Main render function for canvas.
  */
-const canvasRender = ( triggerDataChange = true ) => {
+export const canvasRender = ( triggerDataChange = true ) => {
     if( parentDOM && canvasDOM && ctx ) {
         let parentDim = parentDOM.getBoundingClientRect();
-        canvasDOM.width = parentDim.width;
-        canvasDOM.height = canvasData.height || canvasDefaultData.height;
-    
+        let pixelRatio = getDevicePixelRatio( ctx ); // Device pixel ratio.
+
+        // Manage pixel ratio of canvas according to device pixel ratio.
+        canvasDOM.width = parentDim.width * pixelRatio;
+        canvasDOM.height = ( canvasData.height || CANVAS_HEIGHT ) * pixelRatio;
+        canvasDOM.style.width = parentDim.width + "px";
+        canvasDOM.style.height = ( canvasData.height || CANVAS_HEIGHT ) + "px";
+        ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
         ClearCanvas();
     
         if( debug ) {
@@ -154,7 +155,7 @@ const canvasRender = ( triggerDataChange = true ) => {
 const setCanvasBG = () => {
     if( canvasDOM && ctx ) {
         ctx.translate(0.5, 0.5); // Smoothening canvas.
-        ctx.fillStyle = canvasData.background || canvasDefaultData.background;
+        ctx.fillStyle = canvasData.background || CANVAS_BG;
         ctx.fillRect(0, 0, canvasDOM.width, canvasDOM.height);
     }
 }

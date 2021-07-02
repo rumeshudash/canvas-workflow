@@ -1,4 +1,4 @@
-import { SELECTION_BOX_OFFSET } from "../Constants/canvas.constants";
+import { BORDER_RADIUS, FONT_FAMILY, FONT_SIZE, LINE_WIDTH, SELECTION_BOX_OFFSET, STROKE_COLOR, TEXT_COLOR } from "../Constants/canvas.constants";
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
 import { formatBorderRadius, getSelectionBoxCords, log } from "./common.utils";
 
@@ -13,34 +13,36 @@ export const drawBoxComponent = ( component: BoxComponent, canvasDefaultData: an
     if( ! ctx ) return;
 
     const padding = 5;
-    const fontSize = component.fontSize || canvasDefaultData.fontSize;
+    const fontSize = component.fontSize || FONT_SIZE;
+    const borderRadius = typeof component.borderRadius !== "undefined" ? component.borderRadius : BORDER_RADIUS ;
 
     ctx.save(); // Save the default state to restore later.
     ctx.beginPath();
-    drawRoundedRect( ctx, component.x, component.y, component.w, component.h, component.borderRadius || canvasDefaultData.borderRadius );
+    drawRoundedRect( ctx, component.x, component.y, component.w, component.h, borderRadius );
     if( component.fillColor ) {
         // Draw box fill
-        ctx.fillStyle = component.fillColor;
+        ctx.fillStyle = component.fillColor || 'transparent';
         ctx.fill();
     }
 
     // Draw box stroke or border.
-    ctx.lineWidth = component.lineWidth || canvasDefaultData.lineWidth;
-    ctx.strokeStyle = component.strokeColor || component.fillColor || canvasDefaultData.strokeColor;
+    ctx.lineWidth = component.lineWidth || LINE_WIDTH;
+    ctx.strokeStyle = component.strokeColor || STROKE_COLOR;
     ctx.stroke();
     ctx.clip(); // Clip inner elements inside box.
 
     // Draw box text.
-    ctx.font = `${fontSize}px ${component.fontFamily}`;
-    ctx.fillStyle = component.textColor || canvasDefaultData.strokeColor;
-    ctx.fillText( 
+    ctx.font = `bold ${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
+    ctx.fillStyle = component.textColor || TEXT_COLOR;
+    ctx.fillText(
         component.title, 
         component.x + padding + ctx.lineWidth, 
         component.y + padding + fontSize + ctx.lineWidth - 5,
     );
     
     if( component.description ) {
-        printAtWordWrap( 
+        ctx.font = `${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
+        printAtWordWrap(
             ctx,
             component.description,
             component.x + padding + ctx.lineWidth,

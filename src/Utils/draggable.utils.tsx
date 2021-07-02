@@ -1,6 +1,6 @@
 import { BOX_MIN_HEIGHT, BOX_MIN_WIDTH, SELECTION_RESIZE_BOX_CURSORS } from "../Constants/canvas.constants";
 import { BoxComponent, CanvasComponent } from "../Dtos/canvas.dtos";
-import { getSelectionBoxCords, log, reversedIndexOf } from "./common.utils";
+import { getSelectionBoxCords, reversedIndexOf } from "./common.utils";
 
 let cwRender: Function;
 let canvasDOM: HTMLCanvasElement;
@@ -306,12 +306,24 @@ const getCanvasCursorPos = ( event: MouseEvent ): { x: number, y: number} => {
  */
 const triggerComponentSelect = (): void => {
     if( canvasDOM ) {
-        const event = new CustomEvent('cwComponentSelected', { 
+        canvasDOM.dispatchEvent( new CustomEvent('cwComponentSelected', { 
             detail:  { 
                 index: dragCompIndex, 
                 component: cwComponents[dragCompIndex] 
             } 
-        });
-        canvasDOM.dispatchEvent( event );
+        }) );
     }
 }
+
+/**
+ * Trigger component moving event. 'cwComponentMoving'
+ */
+// const triggerComponentMoving = (): void => {
+//     if( canvasDOM ) {
+//         canvasDOM.dispatchEvent( new CustomEvent('cwComponentMoving', { 
+//             detail:  { 
+//                 components: cwComponents,
+//             }
+//         }) );
+//     }
+// }
