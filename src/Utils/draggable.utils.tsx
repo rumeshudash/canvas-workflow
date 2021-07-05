@@ -1,6 +1,6 @@
 import { BOX_MIN_HEIGHT, BOX_MIN_WIDTH, SELECTION_RESIZE_BOX_CURSORS } from "../Constants/canvas.constants";
 import { BoxComponent, CanvasComponent } from "../Dtos/canvas.dtos";
-import { getDefaultBoxData, getSelectionBoxCords, reversedIndexOf } from "./common.utils";
+import { getDefaultBoxData, getSelectionBoxCords, getSnapCords, getSnapSize, reversedIndexOf } from "./common.utils";
 
 let cwRender: Function;
 let canvasDOM: HTMLCanvasElement;
@@ -148,16 +148,18 @@ const onMouseMove = ( event: MouseEvent ): void => {
             let cursorChangeY = prevCursorPos.y - canvasEvent.y;
 
             for( let index = 0; index < cwComponents.length; index++ ) {
-                cwComponents[index].x = tempComponents[index].x - cursorChangeX;
-                cwComponents[index].y = tempComponents[index].y - cursorChangeY;
+                const cords = getSnapCords( tempComponents[index].x - cursorChangeX, tempComponents[index].y - cursorChangeY );
+                cwComponents[index].x = cords.x;
+                cwComponents[index].y = cords.y;
             }
             cwRender();
         }
     } else if( isDragging && ! isResizing && dragCompIndex !== -1 ) {
 
         // Drag component.
-        cwComponents[dragCompIndex].x = canvasEvent.x - offset.x;
-        cwComponents[dragCompIndex].y = canvasEvent.y - offset.y;
+        const cords = getSnapCords( canvasEvent.x - offset.x, canvasEvent.y - offset.y );
+        cwComponents[dragCompIndex].x = cords.x;
+        cwComponents[dragCompIndex].y = cords.y;
         cwRender();
     } else if( isResizing && dragCompIndex !== -1 ) {
 
@@ -190,6 +192,14 @@ const onMouseMove = ( event: MouseEvent ): void => {
         if( cwComponents[dragCompIndex].h <= BOX_MIN_HEIGHT ) {
             cwComponents[dragCompIndex].h = BOX_MIN_HEIGHT;
         }
+
+        const cords = getSnapCords( cwComponents[dragCompIndex].x, cwComponents[dragCompIndex].y );
+        const size = getSnapSize( cwComponents[dragCompIndex].w, cwComponents[dragCompIndex].h );
+
+        cwComponents[dragCompIndex].x = cords.x;
+        cwComponents[dragCompIndex].y = cords.y;
+        cwComponents[dragCompIndex].w = size.w;
+        cwComponents[dragCompIndex].h = size.h;
 
         cwRender();
     } else {

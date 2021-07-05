@@ -1,7 +1,23 @@
-import { BORDER_RADIUS, FONT_FAMILY, FONT_SIZE, LINE_WIDTH, SELECTION_BOX_OFFSET, STROKE_COLOR, TEXT_COLOR } from "../Constants/canvas.constants";
+import { BORDER_RADIUS, CANVAS_GRID_COLOR, CANVAS_GRID_SIZE, DEFAULT_SHOW_GRID, FONT_FAMILY, FONT_SIZE, LINE_WIDTH, SELECTION_BOX_OFFSET, STROKE_COLOR, TEXT_COLOR } from "../Constants/canvas.constants";
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { formatBorderRadius, getSelectionBoxCords, log } from "./common.utils";
+import { formatBorderRadius, getSelectionBoxCords } from "./common.utils";
 
+/** */
+export const drawCanvasDotGrid = ( canvasData: CanvasData, canvasDOM?: HTMLCanvasElement, ctx?: CanvasRenderingContext2D | null ) => {
+    if( ! canvasDOM || ! ctx ) return;
+    if( ! ( typeof canvasData.showGrid !== 'undefined' ? canvasData.showGrid : DEFAULT_SHOW_GRID ) ) return;
+
+    const dot_size = 1,
+        vw = canvasDOM.width,
+        vh = canvasDOM.height;
+
+    for (var x = 0; x < vw; x+= CANVAS_GRID_SIZE ) {
+        for (var y = 0; y < vh; y+= CANVAS_GRID_SIZE) {
+            ctx.fillStyle = canvasData.gridColor || CANVAS_GRID_COLOR;
+            ctx.fillRect( x - (dot_size / 2), y - (dot_size / 2), dot_size, dot_size );
+        }
+    }
+}
 
 /**
  * Draw Box component.
@@ -9,7 +25,7 @@ import { formatBorderRadius, getSelectionBoxCords, log } from "./common.utils";
  * @param component Box Component
  * @returns void
  */
-export const drawBoxComponent = ( component: BoxComponent, canvasDefaultData: any,  ctx?: CanvasRenderingContext2D | null ) => {
+export const drawBoxComponent = ( component: BoxComponent, ctx?: CanvasRenderingContext2D | null ) => {
     if( ! ctx ) return;
 
     const padding = 5;

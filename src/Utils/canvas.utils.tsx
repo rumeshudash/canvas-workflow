@@ -2,7 +2,7 @@ import { BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
 import { debounce, getDevicePixelRatio, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
-import { drawBoxComponent, drawSelectionHandle } from './draw.utils';
+import { drawBoxComponent, drawCanvasDotGrid, drawSelectionHandle } from './draw.utils';
 import { CANVAS_BG, CANVAS_HEIGHT } from "../Constants/canvas.constants";
 
 let forceStopDebug = true;
@@ -142,6 +142,7 @@ export const canvasRender = ( triggerDataChange = true ) => {
         }
         
         setCanvasBG();
+        drawCanvasDotGrid( canvasData, canvasDOM, ctx );
 
         if( canvasData?.components ) {
             canvasData.components.forEach( ( component ) => {
@@ -179,7 +180,7 @@ const renderComponents = ( component: CanvasComponent ) => {
     processBaseComponent( component );
     switch( component.type ) {
         case 'box':
-            drawBoxComponent( component as BoxComponent, canvasDefaultData, ctx );
+            drawBoxComponent( component as BoxComponent, ctx );
             break;
     }
     drawSelectionHandle( component, canvasData, selectedIndex, canvasDefaultData, cwMode, ctx );

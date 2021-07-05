@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import CanvasWorkflow from 'canvas-workflow'
 import { CanvasData } from 'canvas-workflow/dist/Dtos/canvas.dtos'
@@ -21,8 +21,14 @@ const App = () => {
         ]
     });
 
+    useEffect(() => {
+        setData( { ...data, height: window.innerHeight } );
+        // eslint-disable-next-line
+    }, []);
+
     const dataChangeHandle = ( data: CanvasData ) => {
         setData( data );
+        // console.log( data );
     }
 
     return (

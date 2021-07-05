@@ -1,8 +1,10 @@
 export const CANVAS_HEIGHT = 500;
 export const MIN_CANVAS_HEIGHT = 250;
-
+export const CANVAS_GRID_SIZE = 10;
+export const CANVAS_GRID_COLOR = '#697689';
+export const DEFAULT_SHOW_GRID = true;
 export const CANVAS_BG = '#f5f5f5';
-export const CANVAS_COLOR_LIST = [ 
+export const CANVAS_COLOR_LIST = [
     '#ffffff', 
     '#f5f5f5', 
     '#D9E3F0',
