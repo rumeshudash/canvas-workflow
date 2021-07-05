@@ -3,6 +3,8 @@ export interface CanvasData {
     background?: string,
     selectionStrokeColor?: string,
     selectionLineWidth?: number,
+    showGrid?: boolean,
+    gridColor?: string,
     components?: CanvasComponent[],
 }
 

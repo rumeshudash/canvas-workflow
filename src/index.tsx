@@ -45,41 +45,13 @@ const ConvasWorkflow = ({ mode = 'editor', data = {}, onDataChange }: Props) => 
         }
     }, [canvasRef, parentRef, cwMode, cwData, cwData.components ])
 
-    const addRandomBox = () => {
-        const randomX = Math.floor( Math.random() * ( canvasRef.current && parseInt( canvasRef.current.style.width ) || 100 ) );
-        const randomY = Math.floor( Math.random() * ( canvasRef.current && parseInt( canvasRef.current.style.height ) || 100 ) );
-        // const randomRadius = Math.floor( Math.random() * 15 );
-
-        const comp: BoxComponent = {
-            type: 'box',
-            title: 'Random',
-            description: 'Random ' + randomX + ':' + randomY,
-            x: randomX,
-            y: randomY,
-            w: 150,
-            h: 100,
-            fillColor: '#ffffff',
-            strokeColor: '#ccc',
-            borderRadius: 2,
-        }
-        setCwData( { ...cwData, components: [ ...cwData?.components || [], comp ] });
-    }
-
-    const clearAll = () => {
-        setCwData( { ...cwData, components: [] } );
-    }
-
     return (
         <div className={`canvas-workflow`} >
             <Toolbar />
             <div className='cw-wrapper' ref={parentRef}>
                 <canvas ref={canvasRef} tabIndex={1}></canvas>
             </div>
-            <div>
-                <Settings data={cwData} canvasRef={canvasRef} />
-                <button onClick={addRandomBox}>Add Random Box</button>
-                <button onClick={clearAll}>Clear All</button>
-            </div>
+            <Settings data={cwData} canvasRef={canvasRef} />
         </div>
     )
 }

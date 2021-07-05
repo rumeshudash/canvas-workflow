@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useReducer, useState } from 'react'
 import { 
     CANVAS_BG, 
     CANVAS_COLOR_LIST, 
@@ -13,7 +13,9 @@ import {
     BORDER_RADIUS, 
     MAX_BORDER_RADIUS, 
     LINE_WIDTH, 
-    MAX_LINE_WIDTH 
+    MAX_LINE_WIDTH, 
+    DEFAULT_SHOW_GRID,
+    CANVAS_GRID_COLOR
 } from '../../Constants/canvas.constants';
 import { BoxComponent, CanvasComponent, CanvasData } from '../../Dtos/canvas.dtos';
 import { canvasRender } from '../../Utils/canvas.utils';
@@ -35,6 +37,7 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     const [component, setComponent] = useState<CanvasComponent>();
     const [height, setHeight] = useState( data.height || CANVAS_HEIGHT );
     const [fonts, setFonts] = useState<string[]>([]);
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
     useEffect(() => {
         // List of available fonts.
@@ -90,6 +93,7 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
             }
             setHeight( data[key] || CANVAS_HEIGHT );
         }
+        forceUpdate();
         canvasRender();
     }
 
@@ -107,7 +111,7 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     }
 
     return (
-        <div className='cw-settings' style={{ height: height }}>
+        <div className='cw-settings'>
             { selection === -1 &&
                 <div className='canvas-settings'>
                     <div className='section presentation'>
@@ -135,6 +139,29 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                     />
                                 </div>
                             </div>
+                            <div className='form-group'>
+                                <div className='form-control inline'>
+                                    <label>Show Grid:</label>
+                                    <input 
+                                        type='checkbox' 
+                                        defaultChecked={typeof data.showGrid !== 'undefined' ? data.showGrid : DEFAULT_SHOW_GRID}
+                                        onChange={ ( e ) => handleDataChange( 'showGrid', e.target.checked )} 
+                                    />
+                                </div>
+                            </div>
+                            { ( data.showGrid || ( typeof data.showGrid === 'undefined' && DEFAULT_SHOW_GRID ) ) && 
+                                <div className='form-group'>
+                                    <div className='form-control'>
+                                        <label>Grid Color:</label>
+                                        <ColorPicker
+                                            type='fill'
+                                            value={data.gridColor || CANVAS_GRID_COLOR} 
+                                            colors={CANVAS_COLOR_LIST}
+                                            onChange={( value ) => handleDataChange( 'gridColor',value ) } 
+                                        />
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-import { SELECTION_BOX_OFFSET, SELECTION_RESIZE_BOX_SIZE } from "../Constants/canvas.constants";
+import { CANVAS_GRID_SIZE, SELECTION_BOX_OFFSET, SELECTION_RESIZE_BOX_SIZE } from "../Constants/canvas.constants";
 import { BorderRadius, BorderRadiusBase } from "../Dtos/canvas.dtos";
 
 /**
@@ -268,4 +268,18 @@ export const getDefaultBoxData = ( x?: number, y?: number ) => {
     }
 
     return boxData;
+}
+
+export const getSnapCords = ( x: number, y: number ) => {
+    return { 
+        x: Math.round( x / CANVAS_GRID_SIZE ) * CANVAS_GRID_SIZE, 
+        y: Math.round( y / CANVAS_GRID_SIZE ) * CANVAS_GRID_SIZE
+    };
+}
+
+export const getSnapSize = ( w: number, h: number ) => {
+    return {
+        w: Math.round( w / CANVAS_GRID_SIZE ) * CANVAS_GRID_SIZE, 
+        h: Math.round( h / CANVAS_GRID_SIZE ) * CANVAS_GRID_SIZE
+    };
 }
