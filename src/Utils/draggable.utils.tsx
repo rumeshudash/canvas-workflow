@@ -148,8 +148,9 @@ const onMouseMove = ( event: MouseEvent ): void => {
             let cursorChangeY = prevCursorPos.y - canvasEvent.y;
 
             for( let index = 0; index < cwComponents.length; index++ ) {
-                cwComponents[index].x = tempComponents[index].x - cursorChangeX;
-                cwComponents[index].y = tempComponents[index].y - cursorChangeY;
+                const cords = getSnapCords( tempComponents[index].x - cursorChangeX, tempComponents[index].y - cursorChangeY );
+                cwComponents[index].x = cords.x;
+                cwComponents[index].y = cords.y;
             }
             cwRender();
         }
