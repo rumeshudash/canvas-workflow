@@ -267,6 +267,10 @@ export const getDefaultBoxData = ( x?: number, y?: number ) => {
         boxData.y = y - ( boxData.h / 2 );
     }
 
+    const cords = getSnapCords( boxData.x, boxData.y );
+    boxData.x = cords.x;
+    boxData.y = cords.y;
+
     return boxData;
 }
 

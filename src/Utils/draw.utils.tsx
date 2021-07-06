@@ -11,8 +11,8 @@ export const drawCanvasDotGrid = ( canvasData: CanvasData, canvasDOM?: HTMLCanva
         vw = canvasDOM.width,
         vh = canvasDOM.height;
 
-    for (var x = 0; x < vw; x+= CANVAS_GRID_SIZE ) {
-        for (var y = 0; y < vh; y+= CANVAS_GRID_SIZE) {
+    for (var x = 0; x < vw + CANVAS_GRID_SIZE; x+= CANVAS_GRID_SIZE ) {
+        for (var y = 0; y < vh + CANVAS_GRID_SIZE; y+= CANVAS_GRID_SIZE) {
             ctx.fillStyle = canvasData.gridColor || CANVAS_GRID_COLOR;
             ctx.fillRect( x - (dot_size / 2), y - (dot_size / 2), dot_size, dot_size );
         }

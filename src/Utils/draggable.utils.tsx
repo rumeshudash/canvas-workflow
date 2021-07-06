@@ -302,6 +302,11 @@ const allowDrop = ( event: any ): any => {
     event.preventDefault();
 } 
 
+/**
+ * Drop element event.
+ * 
+ * @param event Event
+ */
 const onDrop = ( event: any ) => {
     event.preventDefault();
     if( event.dataTransfer ) {
