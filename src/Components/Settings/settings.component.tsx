@@ -24,6 +24,7 @@ import Textarea from '../Inputs/Textarea/textarea.component';
 import NumberInput from '../Inputs/NumberInput/numberInput.component';
 import ColorPicker from '../Inputs/ColorPicker/colorPicker.component';
 import SliderInput from '../Inputs/SliderInput/sliderInput.component';
+import Collapse from '../Collapse/collapse.component';
 import './settings.component.scss';
 
 interface SettingsProps {
@@ -114,9 +115,8 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
         <div className='cw-settings'>
             { selection === -1 &&
                 <div className='canvas-settings'>
-                    <div className='section presentation'>
-                        <div className='title'>Canvas Settings</div>
-                        <div className='controls'>
+                    <Collapse title='Canvas Settings'>
+                        <div>
                             <div className='form-group'>
                                 <div className='form-control'>
                                     <label>Background:</label>
@@ -163,14 +163,13 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                 </div>
                             }
                         </div>
-                    </div>
+                    </Collapse>
                 </div>
             }
-            { selection !== -1 && 
+            { selection !== -1 &&
                 <div className='component-settings'>
-                    <div className='section presentation'>
-                        <div className='title'>Presentation</div>
-                        <div className='controls'>
+                    <Collapse title='Presentation'>
+                        <div>
                             { comp && comp.type === 'box' && <div>
                                 <div className='form-group'>
                                     <div className='form-control'>
@@ -215,10 +214,9 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                 </div>
                             </div>}
                         </div>
-                    </div>
-                    <div className='section text'>
-                        <div className='title'>Text</div>
-                        <div className='controls'>
+                    </Collapse>
+                    <Collapse title='Text'>
+                        <div>
                             { comp && comp.type === 'box' && <div>
                                 <div className='form-group'>
                                     <div className='form-control'>
@@ -275,7 +273,7 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                 </div>
                             </div>}
                         </div>
-                    </div>
+                    </Collapse>
                 </div>
             }
         </div>

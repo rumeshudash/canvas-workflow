@@ -1,4 +1,5 @@
 import React from 'react'
+import Collapse from '../Collapse/collapse.component';
 import { ReactComponent as BoxSvg } from '../../Assets/Images/workflowBox.svg'  ;
 import './toolbar.component.scss';
 
@@ -10,14 +11,13 @@ const Toolbar = () => {
 
     return (
         <div className='cw-toolbar'>
-            <div className='toolbar-standard'>
-                <div className='title'>Standard Shapes</div>
+            <Collapse title='Standard Shapes'>
                 <div className='tools'>
                     <div id='box' className='tool-item' draggable="true" onDragStart={ handleDragStart }>
                         <BoxSvg/>
                     </div>
                 </div>
-            </div>
+            </Collapse>
         </div>
     )
 }
