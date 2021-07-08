@@ -5,21 +5,7 @@ import { CanvasData } from 'canvas-workflow/dist/Dtos/canvas.dtos'
 import 'canvas-workflow/dist/index.css'
 
 const App = () => {
-    const [ data, setData ] = useState<CanvasData>({
-        components:[
-            { 
-                type: 'box',
-                title: 'Begin',
-                description: 'Begin',
-                x: 100,
-                y: 100,
-                w: 150,
-                h: 100,
-                lineWidth: 1,
-                fillColor: '#ffffff',
-            }
-        ]
-    });
+    const [ data, setData ] = useState<CanvasData>({});
 
     useEffect(() => {
         setData( { ...data, height: window.innerHeight } );

@@ -1,8 +1,25 @@
-import { BORDER_RADIUS, CANVAS_GRID_COLOR, CANVAS_GRID_SIZE, DEFAULT_SHOW_GRID, FONT_FAMILY, FONT_SIZE, LINE_WIDTH, SELECTION_BOX_OFFSET, STROKE_COLOR, TEXT_COLOR } from "../Constants/canvas.constants";
+import { 
+    BORDER_RADIUS, 
+    CANVAS_GRID_COLOR, 
+    CANVAS_GRID_SIZE, 
+    DEFAULT_SHOW_GRID, 
+    FONT_FAMILY, 
+    FONT_SIZE, 
+    LINE_WIDTH, 
+    OPTION_BG_COLOR, 
+    OPTION_FONT_SIZE, 
+    OPTION_TEXT_COLOR, 
+    OPTION_HEIGHT,
+    SELECTION_BOX_OFFSET, 
+    STROKE_COLOR, 
+    TEXT_COLOR 
+} from "../Constants/canvas.constants";
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
 import { formatBorderRadius, getSelectionBoxCords } from "./common.utils";
 
-/** */
+/**
+ * Draw Canvas Dot grid.
+*/
 export const drawCanvasDotGrid = ( canvasData: CanvasData, canvasDOM?: HTMLCanvasElement, ctx?: CanvasRenderingContext2D | null ) => {
     if( ! canvasDOM || ! ctx ) return;
     if( ! ( typeof canvasData.showGrid !== 'undefined' ? canvasData.showGrid : DEFAULT_SHOW_GRID ) ) return;
@@ -20,57 +37,15 @@ export const drawCanvasDotGrid = ( canvasData: CanvasData, canvasDOM?: HTMLCanva
 }
 
 /**
- * Draw Box component.
+ * Draw rounded rect ( With border radius ).
  * 
- * @param component Box Component
- * @returns void
+ * @param ctx Context.
+ * @param x Rect X Coord.
+ * @param y Rect Y Coord.
+ * @param width Width of rect.
+ * @param height Height of rect.
+ * @param borderRadius Border radius of rect.
  */
-export const drawBoxComponent = ( component: BoxComponent, ctx?: CanvasRenderingContext2D | null ) => {
-    if( ! ctx ) return;
-
-    const padding = 5;
-    const fontSize = component.fontSize || FONT_SIZE;
-    const borderRadius = typeof component.borderRadius !== "undefined" ? component.borderRadius : BORDER_RADIUS ;
-
-    ctx.save(); // Save the default state to restore later.
-    ctx.beginPath();
-    drawRoundedRect( ctx, component.x, component.y, component.w, component.h, borderRadius );
-    if( component.fillColor ) {
-        // Draw box fill
-        ctx.fillStyle = component.fillColor || 'transparent';
-        ctx.fill();
-    }
-
-    // Draw box stroke or border.
-    ctx.lineWidth = component.lineWidth || LINE_WIDTH;
-    ctx.strokeStyle = component.strokeColor || STROKE_COLOR;
-    ctx.stroke();
-    ctx.clip(); // Clip inner elements inside box.
-
-    // Draw box text.
-    ctx.font = `bold ${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
-    ctx.fillStyle = component.textColor || TEXT_COLOR;
-    ctx.fillText(
-        component.title, 
-        component.x + padding + ctx.lineWidth, 
-        component.y + padding + fontSize + ctx.lineWidth - 5,
-    );
-    
-    if( component.description ) {
-        ctx.font = `${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
-        printAtWordWrap(
-            ctx,
-            component.description,
-            component.x + padding + ctx.lineWidth,
-            component.y + (padding * 2) + (fontSize * 2) + ctx.lineWidth - 5,
-            fontSize,
-            component.w - (padding * 2) - ctx.lineWidth,
-        );
-    }
-    ctx.restore(); // Restore default state.
-}
-
-
 export const drawRoundedRect = ( ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, borderRadius?: BorderRadius ) => {
     const radius = formatBorderRadius( borderRadius );
     ctx.moveTo(x + radius.tl, y);
@@ -147,6 +122,17 @@ export const drawSelectionHandle = ( component: CanvasComponent, canvasData: Can
     }
 }
 
+/**
+ * Draw Text/Word with word wrap.
+ * 
+ * @param ctx Context
+ * @param text Text to draw
+ * @param x Text X Coord.
+ * @param y Text Y Coord.
+ * @param lineHeight Text line height.
+ * @param fitWidth Width to fit text.
+ * @returns void
+ */
 export const printAtWordWrap = ( ctx: CanvasRenderingContext2D , text: string, x: number, y: number, lineHeight: number, fitWidth?: number) => {
     fitWidth = fitWidth || 0;
     
@@ -178,4 +164,109 @@ export const printAtWordWrap = ( ctx: CanvasRenderingContext2D , text: string, x
     }
     if  (idx > 0)
         ctx.fillText( words.join(' '), x, y + (lineHeight * currentLine) );
+}
+
+export const drawCurvedLine = ( points: any[], ctx: CanvasRenderingContext2D, tension = 1 ) => {
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+
+    var t = (tension !== null) ? tension : 0;
+    for (var i = 0; i < points.length - 1; i++) {
+        var p0 = (i > 0) ? points[i - 1] : points[0];
+        var p1 = points[i];
+        var p2 = points[i + 1];
+        var p3 = (i != points.length - 2) ? points[i + 2] : p2;
+
+        var cp1x = p1.x + (p2.x - p0.x) / 10 * t;
+        var cp1y = p1.y + (p2.y - p0.y) / 10 * t;
+
+        var cp2x = p2.x - (p3.x - p1.x) / 10 * t;
+        var cp2y = p2.y - (p3.y - p1.y) / 10 * t;
+
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+    }
+    ctx.stroke();
+}
+
+/**
+ * Draw Box component.
+ * 
+ * @param component Box Component
+ * @returns void
+ */
+export const drawBoxComponent = ( component: BoxComponent, ctx?: CanvasRenderingContext2D | null ) => {
+    if( ! ctx ) return;
+
+    const padding = 5;
+    const fontSize = component.fontSize || FONT_SIZE;
+    const borderRadius = typeof component.borderRadius !== "undefined" ? component.borderRadius : BORDER_RADIUS ;
+
+    ctx.save(); // Save the default state to restore later.
+    ctx.beginPath();
+    drawRoundedRect( ctx, component.x, component.y, component.w, component.h, borderRadius );
+
+    if( component.fillColor ) {
+        // Draw box fill
+        ctx.fillStyle = component.fillColor || 'transparent';
+        ctx.fill();
+    }
+
+    // Draw box stroke or border.
+    ctx.lineWidth = component.lineWidth || LINE_WIDTH;
+    ctx.strokeStyle = component.strokeColor || STROKE_COLOR;
+    ctx.stroke();
+    ctx.clip('evenodd'); // Clip inner elements inside box.
+
+    // Draw box text.
+    ctx.font = `bold ${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
+    ctx.fillStyle = component.textColor || TEXT_COLOR;
+    ctx.fillText(
+        component.title, 
+        component.x + padding + ctx.lineWidth, 
+        component.y + padding + fontSize + ctx.lineWidth - 5,
+    );
+    
+    if( component.description ) {
+        ctx.font = `${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
+        printAtWordWrap(
+            ctx,
+            component.description,
+            component.x + padding + ctx.lineWidth,
+            component.y + (padding * 2) + (fontSize * 2) + ctx.lineWidth - 5,
+            fontSize,
+            component.w - (padding * 2) - ctx.lineWidth,
+        );
+    }
+
+    if( component.options ) {
+        const optionsLength = component.options.length;
+
+        component.options.forEach( ( option, index ) => {
+            ctx.fillStyle = OPTION_BG_COLOR;
+            const optionDim = {
+                x: component.x,
+                y: component.y + component.h - ( OPTION_HEIGHT * (optionsLength - index) ),
+                w: component.w,
+                h: OPTION_HEIGHT,
+            }
+            ctx.fillRect( optionDim.x, optionDim.y, optionDim.w, optionDim.h );
+
+            ctx.font = `${OPTION_FONT_SIZE}px ${component.fontFamily || FONT_FAMILY}`;
+            ctx.fillStyle = OPTION_TEXT_COLOR;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(
+                option.name, 
+                optionDim.x + ( optionDim.w / 2 ),
+                optionDim.y + ( OPTION_HEIGHT / 2 ),
+            );
+
+            ctx.strokeStyle = component.strokeColor || STROKE_COLOR;
+            ctx.moveTo(component.x, optionDim.y);
+            ctx.lineTo(component.x + component.w, optionDim.y);
+            ctx.stroke();
+        } );
+    }
+
+    ctx.restore(); // Restore default state.
 }

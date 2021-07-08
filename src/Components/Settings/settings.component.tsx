@@ -17,7 +17,7 @@ import {
     DEFAULT_SHOW_GRID,
     CANVAS_GRID_COLOR
 } from '../../Constants/canvas.constants';
-import { BoxComponent, CanvasComponent, CanvasData } from '../../Dtos/canvas.dtos';
+import { BoxComponent, CanvasComponent, CanvasData, Option } from '../../Dtos/canvas.dtos';
 import { canvasRender } from '../../Utils/canvas.utils';
 import { getAvailableFontList } from '../../Utils/common.utils';
 import Textarea from '../Inputs/Textarea/textarea.component';
@@ -36,25 +36,21 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
 
     const [selection, setSelection] = useState<number>(-1);
     const [component, setComponent] = useState<CanvasComponent>();
-    const [height, setHeight] = useState( data.height || CANVAS_HEIGHT );
     const [fonts, setFonts] = useState<string[]>([]);
     const [, forceUpdate] = useReducer(x => x + 1, 0);
 
     useEffect(() => {
         // List of available fonts.
         setFonts(getAvailableFontList());
-
     }, [])
 
     useEffect(() => {
         if( canvasRef.current ) {
             canvasRef.current.addEventListener('cwComponentSelected', handleSelectionChange );
-            // canvasRef.current.addEventListener('cwComponentMoving', handleComponentMoving );
         }
         return () => {
             if( canvasRef.current ) {
                 canvasRef.current.removeEventListener('cwComponentSelected', handleSelectionChange );
-                // canvasRef.current.removeEventListener('cwComponentMoving', handleComponentMoving );
             }
         }
     }, [ canvasRef.current, selection ])
@@ -66,18 +62,13 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     }, [data])
 
     const handleSelectionChange = ( event: CustomEvent ) => {
-        setSelection( -1 );
-        setSelection( event.detail.index );
-        setComponent( undefined );
-        setComponent( event.detail.component );
+        if( selection !== event.detail.index ) {
+            setSelection( event.detail.index );
+            setComponent( undefined );
+            setComponent( event.detail.component );
+            forceUpdate();
+        }
     }
-
-    // const handleComponentMoving = ( event: CustomEvent ) => {
-    //     if( selection !== -1 ) {
-    //         setComponent(undefined);
-    //         setComponent( event.detail.components[selection] );
-    //     }
-    // }
 
     let comp: any;
     if( component && component.type === 'box' ) {
@@ -92,7 +83,6 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
             } else if( ! value ) {
                 data[key] = CANVAS_HEIGHT;
             }
-            setHeight( data[key] || CANVAS_HEIGHT );
         }
         forceUpdate();
         canvasRender();
@@ -101,12 +91,26 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     const handleComponentDataChange = ( key: string, value: any ) => {
         if( selection !== -1 ) {
             if( data.components && data.components[selection] ) {
-                const newComponent = { ...data.components[selection] }
+                const newComponent = { ...data.components[selection] };
                 newComponent[key] = value;
                 data.components[selection] = newComponent;
 
                 setComponent( data.components[selection] );
                 canvasRender();
+            }
+        }
+    }
+
+    const handleComponentOptionChange = ( index: number, key: string, value: any ) => {
+        if( selection !== -1 ) {
+            if( data.components && data.components[selection]?.options ) {
+                const newComponent = { ...data.components[selection] };
+                if( newComponent.options && newComponent.options[index] ) {
+                    newComponent.options[index][key] = value;
+                    data.components[selection] = newComponent;
+                    setComponent( data.components[selection] );
+                    canvasRender();
+                }
             }
         }
     }
@@ -169,110 +173,115 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
             { selection !== -1 &&
                 <div className='component-settings'>
                     <Collapse title='Presentation'>
-                        <div>
-                            { comp && comp.type === 'box' && <div>
-                                <div className='form-group'>
-                                    <div className='form-control'>
-                                        <label>Fill:</label>
-                                        <ColorPicker 
-                                            type='fill'
-                                            value={comp.fillColor || 'transparent'} 
-                                            colors={CANVAS_COLOR_LIST}
-                                            onChange={( value ) => handleComponentDataChange( 'fillColor',value ) } 
-                                        />
-                                    </div>
-                                    <div className='form-control'>
-                                        <label>Outline:</label>
-                                        <ColorPicker
-                                            type='stroke'
-                                            value={comp.strokeColor || STROKE_COLOR} 
-                                            colors={CANVAS_COLOR_LIST}
-                                            onChange={( value ) => handleComponentDataChange( 'strokeColor',value ) } 
-                                        />
-                                    </div>
+                        { comp && comp.type === 'box' && <div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Fill:</label>
+                                    <ColorPicker 
+                                        type='fill'
+                                        value={comp.fillColor || 'transparent'} 
+                                        colors={CANVAS_COLOR_LIST}
+                                        onChange={( value ) => handleComponentDataChange( 'fillColor',value ) } 
+                                    />
                                 </div>
-                                <div className='form-group'>
-                                    <div className='form-control'>
-                                        <label>Outline Width: <strong>{ comp.lineWidth || BORDER_RADIUS } px</strong></label>
-                                        <SliderInput
-                                            value={ comp.lineWidth || LINE_WIDTH } 
-                                            min={1}
-                                            max={MAX_LINE_WIDTH}
-                                            onAfterChange={( value ) => handleComponentDataChange( 'lineWidth', value )}
-                                        />
-                                    </div>
+                                <div className='form-control'>
+                                    <label>Outline:</label>
+                                    <ColorPicker
+                                        type='stroke'
+                                        value={comp.strokeColor || STROKE_COLOR} 
+                                        colors={CANVAS_COLOR_LIST}
+                                        onChange={( value ) => handleComponentDataChange( 'strokeColor',value ) } 
+                                    />
                                 </div>
-                                <div className='form-group'>
-                                    <div className='form-control'>
-                                        <label>Border Radius: <strong>{ typeof comp.borderRadius !== 'undefined' ? comp.borderRadius : BORDER_RADIUS } px</strong></label>
-                                        <SliderInput
-                                            value={ typeof comp.borderRadius !== 'undefined' ? comp.borderRadius : BORDER_RADIUS } 
-                                            max={MAX_BORDER_RADIUS}
-                                            onAfterChange={( value ) => handleComponentDataChange( 'borderRadius', value )}
-                                        />
-                                    </div>
+                            </div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Outline Width: <strong>{ comp.lineWidth || BORDER_RADIUS } px</strong></label>
+                                    <SliderInput
+                                        value={ comp.lineWidth || LINE_WIDTH } 
+                                        min={1}
+                                        max={MAX_LINE_WIDTH}
+                                        onAfterChange={( value ) => handleComponentDataChange( 'lineWidth', value )}
+                                    />
                                 </div>
-                            </div>}
-                        </div>
+                            </div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Border Radius: <strong>{ typeof comp.borderRadius !== 'undefined' ? comp.borderRadius : BORDER_RADIUS } px</strong></label>
+                                    <SliderInput
+                                        value={ typeof comp.borderRadius !== 'undefined' ? comp.borderRadius : BORDER_RADIUS } 
+                                        max={MAX_BORDER_RADIUS}
+                                        onAfterChange={( value ) => handleComponentDataChange( 'borderRadius', value )}
+                                    />
+                                </div>
+                            </div>
+                        </div>}
                     </Collapse>
                     <Collapse title='Text'>
-                        <div>
-                            { comp && comp.type === 'box' && <div>
-                                <div className='form-group'>
-                                    <div className='form-control'>
-                                        <label>Title:</label>
-                                        <input 
-                                            type='text' 
-                                            placeholder='Title'
-                                            defaultValue={comp.title}
-                                            onChange={(e) => handleComponentDataChange( 'title', e.target.value )}
-                                        />
-                                    </div>
+                        { comp?.type === 'box' && <div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Title:</label>
+                                    <input 
+                                        type='text' 
+                                        placeholder='Title'
+                                        defaultValue={comp.title}
+                                        onChange={(e) => handleComponentDataChange( 'title', e.target.value )}
+                                    />
                                 </div>
-                                <div className='form-group'>
-                                    <div className='form-control'>
-                                        <label>Description:</label>
-                                        <Textarea 
-                                            placeholder='Description' 
-                                            value={comp.description} 
-                                            onChange={(value) => handleComponentDataChange( 'description', value )} 
-                                        />
-                                    </div>
+                            </div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Description:</label>
+                                    <Textarea 
+                                        placeholder='Description' 
+                                        value={comp.description} 
+                                        onChange={(value) => handleComponentDataChange( 'description', value )} 
+                                    />
                                 </div>
-                                <div className='form-group'>
-                                    <div className='form-control'>
-                                        <label>Font Size: <strong>{comp.fontSize || FONT_SIZE}px</strong></label>
-                                        <SliderInput
-                                            value={comp.fontSize || FONT_SIZE} 
-                                            min={MIN_FONT_SIZE}
-                                            max={MAX_FONT_SIZE}
-                                            onAfterChange={( value ) => handleComponentDataChange( 'fontSize', value )}
-                                        />
-                                    </div>
+                            </div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Font Size: <strong>{comp.fontSize || FONT_SIZE}px</strong></label>
+                                    <SliderInput
+                                        value={comp.fontSize || FONT_SIZE} 
+                                        min={MIN_FONT_SIZE}
+                                        max={MAX_FONT_SIZE}
+                                        onAfterChange={( value ) => handleComponentDataChange( 'fontSize', value )}
+                                    />
                                 </div>
-                                <div className='form-group'>
-                                    <div className='form-control'>
-                                        <label>Font Family:</label>
-                                        <select defaultValue={comp.fontFamily || FONT_FAMILY} onChange={( e ) => handleComponentDataChange( 'fontFamily', e.target.value ) }>
-                                            { fonts.length > 0 && fonts.map( ( font ) => (
-                                                <option key={font} value={font}>{font}</option>
-                                            ) ) }
-                                        </select>
-                                    </div>
+                            </div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Font Family:</label>
+                                    <select defaultValue={comp.fontFamily || FONT_FAMILY} onChange={( e ) => handleComponentDataChange( 'fontFamily', e.target.value ) }>
+                                        { fonts.length > 0 && fonts.map( ( font ) => (
+                                            <option key={font} value={font}>{font}</option>
+                                        ) ) }
+                                    </select>
                                 </div>
-                                <div className='form-group'>
-                                    <div className='form-control'>
-                                        <label>Text Color:</label>
-                                        <ColorPicker
-                                            type='fill'
-                                            value={comp.textColor || TEXT_COLOR} 
-                                            colors={CANVAS_COLOR_LIST}
-                                            onChange={( value ) => handleComponentDataChange( 'textColor',value ) } 
-                                        />
-                                    </div>
+                            </div>
+                            <div className='form-group'>
+                                <div className='form-control'>
+                                    <label>Text Color:</label>
+                                    <ColorPicker
+                                        type='fill'
+                                        value={comp.textColor || TEXT_COLOR} 
+                                        colors={CANVAS_COLOR_LIST}
+                                        onChange={( value ) => handleComponentDataChange( 'textColor',value ) } 
+                                    />
                                 </div>
-                            </div>}
-                        </div>
+                            </div>
+                        </div>}
+                    </Collapse>
+                    <Collapse title='Options'>
+                        { comp?.options && comp.options.map( ( option: Option, index: number ) => (
+                            <div key={option.key} className='form-group'>
+                                <div className='form-control'>
+                                    <input type='text' defaultValue={option.name} onChange={ (e) => handleComponentOptionChange( index, 'name', e.target.value ) } />
+                                </div>
+                            </div>
+                        ) ) }
                     </Collapse>
                 </div>
             }

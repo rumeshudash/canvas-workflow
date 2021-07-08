@@ -1,5 +1,5 @@
 import { CANVAS_GRID_SIZE, SELECTION_BOX_OFFSET, SELECTION_RESIZE_BOX_SIZE } from "../Constants/canvas.constants";
-import { BorderRadius, BorderRadiusBase } from "../Dtos/canvas.dtos";
+import { BorderRadius, BorderRadiusBase, BoxComponent } from "../Dtos/canvas.dtos";
 
 /**
  * Log tag.
@@ -248,7 +248,8 @@ export const log = ( ...message: any[] ): void => {
 }
 
 export const getDefaultBoxData = ( x?: number, y?: number ) => {
-    let boxData = { 
+    let boxData: BoxComponent = { 
+        key: getUniqueKey(),
         type: 'box',
         title: 'Workflow',
         description: 'Your workflow description here.',
@@ -258,6 +259,16 @@ export const getDefaultBoxData = ( x?: number, y?: number ) => {
         h: 100,
         lineWidth: 1,
         fillColor: '#ffffff',
+        options: [
+            { 
+                key: getUniqueKey(),
+                name: 'Always',
+            },
+            { 
+                key: getUniqueKey(),
+                name: 'Completed',
+            }
+        ]
     };
 
     if( typeof x !== 'undefined' ) {
@@ -286,4 +297,13 @@ export const getSnapSize = ( w: number, h: number ) => {
         w: Math.round( w / CANVAS_GRID_SIZE ) * CANVAS_GRID_SIZE, 
         h: Math.round( h / CANVAS_GRID_SIZE ) * CANVAS_GRID_SIZE
     };
+}
+
+export const getUniqueKey = () => {
+    return getRandomValue().toString();
+}
+
+export const getRandomValue = () => {
+    const crypto = window.crypto || (window as any).msCrypto;
+    return crypto.getRandomValues(new Uint32Array(1))[0];
 }

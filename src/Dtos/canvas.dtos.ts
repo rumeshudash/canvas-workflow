@@ -11,6 +11,7 @@ export interface CanvasData {
 export type CanvasComponent = BoxComponent | DiamondComponent;
 
 export interface BaseComponent {
+    key: string;
     type: string;
     x: number;
     y: number;
@@ -20,6 +21,7 @@ export interface BaseComponent {
     lineWidth?: number;
     strokeColor?: string;
     draggable?: boolean;
+    options?: Option[];
 }
 
 export interface BoxComponent extends BaseComponent {
@@ -42,4 +44,9 @@ export interface BorderRadiusBase {
     tr: number; 
     br: number; 
     bl: number 
+}
+
+export interface Option {
+    key: string;
+    name: string;
 }
