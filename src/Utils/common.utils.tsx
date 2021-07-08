@@ -300,7 +300,7 @@ export const getSnapSize = ( w: number, h: number ) => {
 }
 
 export const getUniqueKey = () => {
-    return getRandomValue().toString();
+    return getRandomValue().toString(36);
 }
 
 export const getRandomValue = () => {
