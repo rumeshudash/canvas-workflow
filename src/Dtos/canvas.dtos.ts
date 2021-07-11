@@ -6,6 +6,7 @@ export interface CanvasData {
     showGrid?: boolean,
     gridColor?: string,
     components?: CanvasComponent[],
+    lines?: CanvasLine[],
 }
 
 export type CanvasComponent = BoxComponent | DiamondComponent;
@@ -49,4 +50,11 @@ export interface BorderRadiusBase {
 export interface Option {
     key: string;
     name: string;
+}
+
+export interface CanvasLine {
+    componentKey: string;
+    optionKey: string;
+    targetKey: string;
+    joints?: any[];
 }

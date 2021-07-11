@@ -2,7 +2,7 @@ import { BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
 import { debounce, getDevicePixelRatio, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
-import { drawBoxComponent, drawCanvasDotGrid, drawCurvedLine, drawSelectionHandle } from './draw.utils';
+import { drawBoxComponent, drawCanvasDotGrid, drawLine, drawSelectionHandle } from './draw.utils';
 import { CANVAS_BG, CANVAS_HEIGHT } from "../Constants/canvas.constants";
 
 let forceStopDebug = true;
@@ -195,12 +195,23 @@ const renderComponents = ( component: CanvasComponent ) => {
 const processBaseComponent = ( component: CanvasComponent ) => {
     // Register editor mode.
     if( cwMode === 'editor' && ctx ) {
-        const points = [
+        const joints = [
             { x: 10, y: 10 },
-            { x: 10, y: 100 },
+            // { x: 10, y: 100 },
             { x: 100, y: 100 },
         ];
 
-        drawCurvedLine(points, ctx);
+        const points = {
+            start: {
+                x: 200,
+                y: 10,
+            },
+            end: {
+                x: 10,
+                y: 10,
+            }
+        }
+
+        drawLine(ctx, points, joints);
     }
 }

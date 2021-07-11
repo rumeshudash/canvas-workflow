@@ -1,5 +1,5 @@
-import { CANVAS_GRID_SIZE, SELECTION_BOX_OFFSET, SELECTION_RESIZE_BOX_SIZE } from "../Constants/canvas.constants";
-import { BorderRadius, BorderRadiusBase, BoxComponent } from "../Dtos/canvas.dtos";
+import { CANVAS_GRID_SIZE, OPTION_HEIGHT, SELECTION_BOX_OFFSET, SELECTION_RESIZE_BOX_SIZE } from "../Constants/canvas.constants";
+import { BorderRadius, BorderRadiusBase, BoxComponent, CanvasComponent } from "../Dtos/canvas.dtos";
 
 /**
  * Log tag.
@@ -306,4 +306,32 @@ export const getUniqueKey = () => {
 export const getRandomValue = () => {
     const crypto = window.crypto || (window as any).msCrypto;
     return crypto.getRandomValues(new Uint32Array(1))[0];
+}
+
+export const getLineAngle = ( cx: number, cy: number, ex: number, ey: number ) => {
+    var dy = ey - cy;
+    var dx = ex - cx;
+    var theta = Math.atan2(dy, dx);
+    theta *= 180 / Math.PI;
+    if (theta < 0) theta = 360 + theta; // range [0, 360)
+    return theta;
+}
+
+export const getDrawLineButtonCords = ( component: CanvasComponent ): any[] => {
+    let cords = [];
+    if( component.options ) {
+        const optionsLength = component.options.length;
+        const buttonSize = 16;
+
+        for( let i = 1; i <= optionsLength; i++ ) {
+            cords.push({
+                x: component.x + component.w + 5,
+                y: component.y + component.h - ( OPTION_HEIGHT * i ) + ( (OPTION_HEIGHT - buttonSize) / 2 ),
+                w: buttonSize + 4,
+                h: buttonSize,
+            });
+        }
+    }
+
+    return cords;
 }

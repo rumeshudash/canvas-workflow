@@ -15,7 +15,8 @@ import {
     TEXT_COLOR 
 } from "../Constants/canvas.constants";
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { formatBorderRadius, getSelectionBoxCords } from "./common.utils";
+import { formatBorderRadius, getLineAngle, getSelectionBoxCords, getDrawLineButtonCords } from "./common.utils";
+import { DrawArrowLineIcon } from "./image.utils";
 
 /**
  * Draw Canvas Dot grid.
@@ -83,10 +84,8 @@ export const drawSelectionHandle = ( component: CanvasComponent, canvasData: Can
 
         switch( component.type ) {
             case 'box':
-                const comp = component as BoxComponent;
-                compDimension.w = comp.w;
-                compDimension.h = comp.h;
-                // dashedLine = false;
+                compDimension.w = (component as BoxComponent).w;
+                compDimension.h = (component as BoxComponent).h;
                 break;
         }
 
@@ -112,9 +111,15 @@ export const drawSelectionHandle = ( component: CanvasComponent, canvasData: Can
         ctx.beginPath();
         ctx.fillStyle = canvasData.selectionStrokeColor || canvasDefaultData.selectionStrokeColor;
         
+        // Draw selection resize boxes.
         const selectionBoxes = getSelectionBoxCords( compDimension );
         for( let box of selectionBoxes ) {
             ctx.rect( box.x, box.y, box.w, box.h );
+        }
+
+        const drawArrowBoxes = getDrawLineButtonCords ( component );
+        for( let arrowBox of drawArrowBoxes ) {
+            drawImage( ctx, DrawArrowLineIcon, arrowBox.x, arrowBox.y, arrowBox.w, arrowBox.h );
         }
 
         ctx.fill();
@@ -166,26 +171,61 @@ export const printAtWordWrap = ( ctx: CanvasRenderingContext2D , text: string, x
         ctx.fillText( words.join(' '), x, y + (lineHeight * currentLine) );
 }
 
-export const drawCurvedLine = ( points: any[], ctx: CanvasRenderingContext2D, tension = 1 ) => {
+export const drawLine = ( ctx: CanvasRenderingContext2D, points: any, joints: any[], tension = 1 ) => {
     ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
+    ctx.moveTo( points.start.x, points.start.y );
+    
+    ctx.lineTo( points.end.x, points.end.y );
+    // var t = (tension !== null) ? tension : 0;
+    // for (var i = 0; i < points.length - 1; i++) {
+    //     var p0 = (i > 0) ? points[i - 1] : points[0];
+    //     var p1 = points[i];
+    //     var p2 = points[i + 1];
+    //     var p3 = (i != points.length - 2) ? points[i + 2] : p2;
 
-    var t = (tension !== null) ? tension : 0;
-    for (var i = 0; i < points.length - 1; i++) {
-        var p0 = (i > 0) ? points[i - 1] : points[0];
-        var p1 = points[i];
-        var p2 = points[i + 1];
-        var p3 = (i != points.length - 2) ? points[i + 2] : p2;
+    //     var cp1x = p1.x + (p2.x - p0.x) / 10 * t;
+    //     var cp1y = p1.y + (p2.y - p0.y) / 10 * t;
 
-        var cp1x = p1.x + (p2.x - p0.x) / 10 * t;
-        var cp1y = p1.y + (p2.y - p0.y) / 10 * t;
+    //     var cp2x = p2.x - (p3.x - p1.x) / 10 * t;
+    //     var cp2y = p2.y - (p3.y - p1.y) / 10 * t;
 
-        var cp2x = p2.x - (p3.x - p1.x) / 10 * t;
-        var cp2y = p2.y - (p3.y - p1.y) / 10 * t;
-
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
-    }
+    //     ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+    // }
     ctx.stroke();
+    const angle = getLineAngle( points.start.x, points.start.y, points.end.x, points.end.y );
+    drawArrowHead( ctx, points.end.x, points.end.y, angle, '#000' );
+}
+
+/**
+ * 
+ * @param ctx CanvasRenderingContext2D
+ * @param x Line end Y.
+ * @param y Line end Y.
+ * @param angle Angle to rotate.
+ * @param fillColor Fill color of arrow head.
+ */
+export const drawArrowHead = ( ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, fillColor: string ) => {
+    drawPolygon( ctx, x, y, 3, 5, fillColor, angle );
+}
+
+/**
+ * Draw Polygon.
+ */
+export const drawPolygon = (ctx: CanvasRenderingContext2D, centerX: number, centerY: number, sideCount: number, size: number, fillColor = '#000000', rotationDegrees = 0 ) => {
+    ctx.save();
+
+    ctx.translate(centerX,centerY);
+    ctx.rotate( rotationDegrees * Math.PI / 180 );
+    ctx.beginPath();
+    ctx.moveTo (size * Math.cos(0), size * Math.sin(0));          
+    for (var i = 1; i <= sideCount;i += 1) {
+        ctx.lineTo (size * Math.cos(i * 2 * Math.PI / sideCount), size * Math.sin(i * 2 * Math.PI / sideCount));
+    }
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+
+    ctx.restore();
 }
 
 /**
@@ -269,4 +309,16 @@ export const drawBoxComponent = ( component: BoxComponent, ctx?: CanvasRendering
     }
 
     ctx.restore(); // Restore default state.
+}
+
+export const drawImage = ( ctx: CanvasRenderingContext2D, source: string, x: number, y: number, w: number, h: number ) => {
+    var img = new Image();
+    console.log( img, source );
+    img.onload = function() {
+        ctx.drawImage(img, x, y, w, h);
+    };
+    img.onerror = function() {
+        console.log( 'error loading image', source );
+    }
+    img.src = source;
 }

@@ -60,8 +60,6 @@ export const DestroyDraggable = (): void => {
  * @param event MouseEvent
  */
 const onMouseDown = ( event: MouseEvent ): void => {
-    // if( ! cwComponents.length ) return;
-
     const canvasEvent = getCanvasCursorPos( event );
 
     // Move canvas
