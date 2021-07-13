@@ -1,8 +1,8 @@
-import { BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { debounce, getDevicePixelRatio, log } from "./common.utils";
+import { BoxComponent, CanvasComponent, CanvasData, CanvasLine } from "../Dtos/canvas.dtos";
+import { debounce, getComponentByKey, getDevicePixelRatio, getOptionCoordsByKey, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
-import { drawBoxComponent, drawCanvasDotGrid, drawSelectionHandle } from './draw.utils';
+import { drawBoxComponent, drawCanvasDotGrid, drawLine, drawSelectionHandle } from './draw.utils';
 import { CANVAS_BG, CANVAS_HEIGHT } from "../Constants/canvas.constants";
 
 let forceStopDebug = true;
@@ -59,12 +59,14 @@ export const InitCanvas = (
 
     if( data ) {
         canvasData = data;
+        canvasData.components = canvasData.components || [];
+        canvasData.lines = canvasData.lines || [];
     }
     
     canvasRender( false );
 
     if( cwMode === 'editor' && canvasData ) {
-        RegisterDraggable( canvasDOM, canvasData.components, canvasRender, RemoveComponent );
+        RegisterDraggable( canvasDOM, canvasData.components, canvasData.lines, canvasRender, RemoveComponent );
     } else {
         DestroyDraggable();
     }
@@ -83,6 +85,10 @@ export const DestroyCanvas = () => {
     }
 }
 
+/**
+ * Remove component from canvas data.
+ * @param index Component index
+ */
 export const RemoveComponent = ( index: number ) => {
     if( canvasData?.components ) {
         let tempData = { ...canvasData };
@@ -142,11 +148,21 @@ export const canvasRender = ( triggerDataChange = true ) => {
         }
         
         setCanvasBG();
+
+        // Draw canvas grid.
         drawCanvasDotGrid( canvasData, canvasDOM, ctx );
 
+        // Render components.
         if( canvasData?.components ) {
             canvasData.components.forEach( ( component ) => {
                 renderComponents(component);
+            } );
+        }
+
+        // Render lines.
+        if( canvasData?.lines ) {
+            canvasData.lines.forEach( ( line ) => {
+                renderLine(line);
             } );
         }
 
@@ -155,6 +171,7 @@ export const canvasRender = ( triggerDataChange = true ) => {
             log('Render Completed');
         }
 
+        // Handle data change.
         if( triggerDataChange ) {
             handleDataChange( canvasData );
         }
@@ -187,13 +204,60 @@ const renderComponents = ( component: CanvasComponent ) => {
 }
 
 /**
+ * Render component in canvas.
+ * @param component Canvas Component
+ */
+const renderLine = ( line: CanvasLine ) => {
+    const startComp = getComponentByKey( line.componentKey, canvasData.components || [] );
+    const endComp = getComponentByKey( line.targetKey, canvasData.components || [] );
+    const startOptionCoords = getOptionCoordsByKey( line.optionKey, startComp );
+
+    if( ctx && startComp && endComp && startOptionCoords ) {
+        let points = {
+            start: {
+                x: startOptionCoords.x - 5,
+                y: startOptionCoords.y + (startOptionCoords.h / 2),
+            },
+            end: { 
+                x: endComp.x,
+                y: endComp.y,
+            }
+        }
+
+        // When target goes right.
+        if( startOptionCoords.x + 50 < endComp.x ) {
+            points.end.y = endComp.y + (endComp.h / 2);
+        }
+        // When target goes left.
+        if( startOptionCoords.x > endComp.x ) {
+            points.end.x = endComp.x + (endComp.w / 2);
+        }
+        // When target goes fully left of box.
+        if( (startOptionCoords.x - startComp.w) > endComp.x ) {
+            points.end.x = endComp.x + endComp.w;
+        }
+        // When target goes fully above of box.
+        if( (startOptionCoords.y - ( startOptionCoords.y - startComp.y )) > (endComp.y + endComp.h) ) {
+            points.end.y = endComp.y + endComp.h;
+        }
+        // When target goes fully left of box.
+        if( (startOptionCoords.x - startComp.w) > (endComp.x + endComp.w) ) {
+            points.end.y = endComp.y + (endComp.h / 2);
+        }
+
+        drawLine( ctx, points );
+    }
+    // drawSelectionHandle( component, canvasData, selectedIndex, canvasDefaultData, cwMode, ctx );
+}
+
+/**
  * Process Base of component.
  * 
  * @param component Canvas Component.
  */
 const processBaseComponent = ( component: CanvasComponent ) => {
     // Register editor mode.
-    if( cwMode === 'editor' ) {
-        
+    if( cwMode === 'editor' && ctx ) {
+        // drawLine( ctx, { start: {x: 10, y: 10 }, end: { x: 100, y: 10 } } )
     }
 }

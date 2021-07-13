@@ -1,5 +1,5 @@
-import { CANVAS_GRID_SIZE, SELECTION_BOX_OFFSET, SELECTION_RESIZE_BOX_SIZE } from "../Constants/canvas.constants";
-import { BorderRadius, BorderRadiusBase } from "../Dtos/canvas.dtos";
+import { CANVAS_GRID_SIZE, OPTION_HEIGHT, SELECTION_BOX_OFFSET, SELECTION_RESIZE_BOX_SIZE } from "../Constants/canvas.constants";
+import { BorderRadius, BorderRadiusBase, BoxComponent, CanvasComponent } from "../Dtos/canvas.dtos";
 
 /**
  * Log tag.
@@ -248,7 +248,8 @@ export const log = ( ...message: any[] ): void => {
 }
 
 export const getDefaultBoxData = ( x?: number, y?: number ) => {
-    let boxData = { 
+    let boxData: BoxComponent = { 
+        key: getUniqueKey(),
         type: 'box',
         title: 'Workflow',
         description: 'Your workflow description here.',
@@ -258,6 +259,16 @@ export const getDefaultBoxData = ( x?: number, y?: number ) => {
         h: 100,
         lineWidth: 1,
         fillColor: '#ffffff',
+        options: [
+            { 
+                key: getUniqueKey(),
+                name: 'Always',
+            },
+            { 
+                key: getUniqueKey(),
+                name: 'Completed',
+            }
+        ]
     };
 
     if( typeof x !== 'undefined' ) {
@@ -274,6 +285,13 @@ export const getDefaultBoxData = ( x?: number, y?: number ) => {
     return boxData;
 }
 
+/**
+ * Get Snapped coordinates.
+ * 
+ * @param x X coord.
+ * @param y Y coord.
+ * @returns {x: number, y: number}
+ */
 export const getSnapCords = ( x: number, y: number ) => {
     return { 
         x: Math.round( x / CANVAS_GRID_SIZE ) * CANVAS_GRID_SIZE, 
@@ -281,9 +299,86 @@ export const getSnapCords = ( x: number, y: number ) => {
     };
 }
 
+/**
+ * Get Snapped size coordinates.
+ * 
+ * @param w Width coord.
+ * @param h Height coord.
+ * @returns { w: number, h: number }
+ */
 export const getSnapSize = ( w: number, h: number ) => {
     return {
         w: Math.round( w / CANVAS_GRID_SIZE ) * CANVAS_GRID_SIZE, 
         h: Math.round( h / CANVAS_GRID_SIZE ) * CANVAS_GRID_SIZE
     };
+}
+
+/**
+ * Get Unique key.
+ * 
+ * @returns String
+ */
+export const getUniqueKey = () => {
+    return getRandomValue().toString(36);
+}
+
+/**
+ * Get random value.
+ * 
+ * @returns number
+ */
+export const getRandomValue = () => {
+    const crypto = window.crypto || (window as any).msCrypto;
+    return crypto.getRandomValues(new Uint32Array(1))[0];
+}
+
+/**
+ * Get angle of line in degree.
+ * 
+ * @param cx Starting line X coord.
+ * @param cy Starting line Y coord.
+ * @param ex Ending line X coord.
+ * @param ey Ending line Y coord.
+ * @returns number
+ */
+export const getLineAngle = ( cx: number, cy: number, ex: number, ey: number ) => {
+    var dy = ey - cy;
+    var dx = ex - cx;
+    var theta = Math.atan2(dy, dx);
+    theta *= 180 / Math.PI;
+    if (theta < 0) theta = 360 + theta; // range [0, 360)
+    return theta;
+}
+
+export const getDrawLineButtonCords = ( component: CanvasComponent ): any[] => {
+    let cords = [];
+    if( component.options ) {
+        const optionsLength = component.options.length;
+        const buttonSize = 16;
+
+        for( let i = 1; i <= optionsLength; i++ ) {
+            cords.push({
+                x: component.x + component.w + 5,
+                y: component.y + component.h - ( OPTION_HEIGHT * i ) + ( (OPTION_HEIGHT - buttonSize) / 2 ),
+                w: buttonSize + 4,
+                h: buttonSize,
+            });
+        }
+    }
+
+    return cords;
+}
+
+export const getComponentByKey = ( key: string, components: CanvasComponent[] ) => {
+    if( components && Array.isArray( components ) ) {
+        return components.find( comp => comp.key === key );
+    }
+    return null;
+}
+
+export const getOptionCoordsByKey = ( key: string, component?: CanvasComponent | null ) => {
+    if( component ) {
+        return getDrawLineButtonCords( component ).find( ( _, index ) => component.options && component.options[index].key === key );
+    }
+    return null;
 }

@@ -47,3 +47,8 @@ export const BORDER_RADIUS = 2;
 export const MAX_BORDER_RADIUS = 20;
 export const LINE_WIDTH = 1;
 export const MAX_LINE_WIDTH = 10;
+
+export const OPTION_BG_COLOR = '#f9fad0';
+export const OPTION_FONT_SIZE = 12;
+export const OPTION_HEIGHT = 20;
+export const OPTION_TEXT_COLOR = '#000000';
