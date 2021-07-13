@@ -9,7 +9,7 @@ export interface CanvasData {
     lines?: CanvasLine[],
 }
 
-export type CanvasComponent = BoxComponent | DiamondComponent;
+export type CanvasComponent = BoxComponent;
 
 export interface BaseComponent {
     key: string;

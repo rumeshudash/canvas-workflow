@@ -16,7 +16,6 @@ import {
 } from "../Constants/canvas.constants";
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
 import { formatBorderRadius, getLineAngle, getSelectionBoxCords, getDrawLineButtonCords } from "./common.utils";
-import { DrawArrowLineIcon } from "./image.utils";
 
 /**
  * Draw Canvas Dot grid.
@@ -119,7 +118,7 @@ export const drawSelectionHandle = ( component: CanvasComponent, canvasData: Can
 
         const drawArrowBoxes = getDrawLineButtonCords ( component );
         for( let arrowBox of drawArrowBoxes ) {
-            drawImage( ctx, DrawArrowLineIcon, arrowBox.x, arrowBox.y, arrowBox.w, arrowBox.h );
+            ctx.drawImage( document.getElementById('arrowLineIcon') as any, arrowBox.x, arrowBox.y, arrowBox.w, arrowBox.h );
         }
 
         ctx.fill();
@@ -171,7 +170,7 @@ export const printAtWordWrap = ( ctx: CanvasRenderingContext2D , text: string, x
         ctx.fillText( words.join(' '), x, y + (lineHeight * currentLine) );
 }
 
-export const drawLine = ( ctx: CanvasRenderingContext2D, points: any, joints: any[], tension = 1 ) => {
+export const drawLine = ( ctx: CanvasRenderingContext2D, points: any, joints?: any[], tension = 1 ) => {
     ctx.beginPath();
     ctx.moveTo( points.start.x, points.start.y );
     
@@ -193,7 +192,7 @@ export const drawLine = ( ctx: CanvasRenderingContext2D, points: any, joints: an
     // }
     ctx.stroke();
     const angle = getLineAngle( points.start.x, points.start.y, points.end.x, points.end.y );
-    drawArrowHead( ctx, points.end.x, points.end.y, angle, '#000' );
+    drawArrowHead( ctx, points.end.x, points.end.y, 7, angle, '#000' );
 }
 
 /**
@@ -201,11 +200,24 @@ export const drawLine = ( ctx: CanvasRenderingContext2D, points: any, joints: an
  * @param ctx CanvasRenderingContext2D
  * @param x Line end Y.
  * @param y Line end Y.
+ * @param size Size of arrow head.
  * @param angle Angle to rotate.
  * @param fillColor Fill color of arrow head.
  */
-export const drawArrowHead = ( ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, fillColor: string ) => {
-    drawPolygon( ctx, x, y, 3, 5, fillColor, angle );
+export const drawArrowHead = ( ctx: CanvasRenderingContext2D, x: number, y: number, size: number, angle: number, fillColor: string ) => {
+    ctx.save();
+
+    ctx.translate(x, y);
+    ctx.rotate( angle * Math.PI / 180 );
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo( - size, - ( size / 2 ) );
+    ctx.lineTo( - size, size / 2 );
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+
+    ctx.restore();
 }
 
 /**
@@ -309,16 +321,4 @@ export const drawBoxComponent = ( component: BoxComponent, ctx?: CanvasRendering
     }
 
     ctx.restore(); // Restore default state.
-}
-
-export const drawImage = ( ctx: CanvasRenderingContext2D, source: string, x: number, y: number, w: number, h: number ) => {
-    var img = new Image();
-    console.log( img, source );
-    img.onload = function() {
-        ctx.drawImage(img, x, y, w, h);
-    };
-    img.onerror = function() {
-        console.log( 'error loading image', source );
-    }
-    img.src = source;
 }

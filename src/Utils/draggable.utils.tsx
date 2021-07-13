@@ -1,10 +1,12 @@
-import { BOX_MIN_HEIGHT, BOX_MIN_WIDTH, SELECTION_RESIZE_BOX_CURSORS } from "../Constants/canvas.constants";
-import { BoxComponent, CanvasComponent } from "../Dtos/canvas.dtos";
-import { getDefaultBoxData, getSelectionBoxCords, getSnapCords, getSnapSize, reversedIndexOf } from "./common.utils";
+import { BOX_MIN_HEIGHT, BOX_MIN_WIDTH, OPTION_HEIGHT, SELECTION_RESIZE_BOX_CURSORS } from "../Constants/canvas.constants";
+import { BoxComponent, CanvasComponent, CanvasLine } from "../Dtos/canvas.dtos";
+import { getDefaultBoxData, getDrawLineButtonCords, getSelectionBoxCords, getSnapCords, getSnapSize, log, reversedIndexOf } from "./common.utils";
+import { drawLine } from "./draw.utils";
 
 let cwRender: Function;
 let canvasDOM: HTMLCanvasElement;
 let cwComponents: CanvasComponent[];
+let cwLines: CanvasLine[];
 let tempComponents: CanvasComponent[];
 
 let removeComponent: ( index: number ) => void;
@@ -13,13 +15,16 @@ let isDragging = false;
 let isResizing = false;
 let listenMovingCanvas = false;
 let isMovingCanvas = false;
+let isDrawingLine = false;
 
 let dragCompIndex = -1;
 let resizeBoxIndex = -1;
+let startDrawLineIndex = -1;
 
 let offset = {x: 0, y: 0};
 let resizePrevCompPos = {x: 0, y: 0, w: 0, h: 0};
 let prevCursorPos = {x: 0, y: 0};
+let lineStartPos = {x: 0, y: 0};
 
 /**
  * Register draggable events.
@@ -28,8 +33,9 @@ let prevCursorPos = {x: 0, y: 0};
  * @param components Component array
  * @param render Render function of canvas.
  */
-export const RegisterDraggable = ( canvas: HTMLCanvasElement, components: CanvasComponent[] = [], render: Function, RemoveComponent: ( index: number ) => void ): void => {
+export const RegisterDraggable = ( canvas: HTMLCanvasElement, components: CanvasComponent[] = [], lines: CanvasLine[] = [], render: Function, RemoveComponent: ( index: number ) => void ): void => {
     cwComponents = components;
+    cwLines = lines;
     canvasDOM = canvas;
     cwRender = render;
     removeComponent = RemoveComponent;
@@ -72,22 +78,30 @@ const onMouseDown = ( event: MouseEvent ): void => {
         return;
     }
 
+    if( ! isMovingCanvas && ! isDragging && !isDrawingLine && dragCompIndex > -1 ) {
+
+        const arrowBoxes = getDrawLineButtonCords( cwComponents[dragCompIndex] );
+        arrowBoxes.every( ( box, index ) => {
+            if( rectCollision(canvasEvent.x, canvasEvent.y, box ) ) {
+                lineStartPos.x = box.x - 5;
+                lineStartPos.y = box.y + ( OPTION_HEIGHT / 2 );
+                isDrawingLine = true;
+                startDrawLineIndex = index;
+                canvasDOM.addEventListener('mouseup', onMouseUp );
+                return false;
+            }
+            return true;
+        } );
+    }
+
     const revComponents = [ ...cwComponents ].reverse();
     // Loop each components for hit.
     for( let comp of revComponents ) {
         let compDimension = {
             x: comp.x,
             y: comp.y,
-            w: 0,
-            h: 0,
-        }
-
-        switch( comp.type ) {
-            case 'box':
-                const c = comp as BoxComponent;
-                compDimension.w = c.w;
-                compDimension.h = c.h;
-                break;
+            w: comp.w,
+            h: comp.h,
         }
 
         if( ! isDragging && rectCollision(canvasEvent.x, canvasEvent.y, compDimension ) ) {
@@ -123,9 +137,10 @@ const onMouseDown = ( event: MouseEvent ): void => {
         }
     }
 
-    if( ! isDragging && ! isResizing ) {
+    if( ! isDragging && ! isResizing && ! isDrawingLine ) {
         dragCompIndex = -1;
         resizeBoxIndex = -1;
+        startDrawLineIndex = -1;
     }
     triggerComponentSelect();
 }
@@ -137,6 +152,7 @@ const onMouseDown = ( event: MouseEvent ): void => {
  */
 const onMouseMove = ( event: MouseEvent ): void => {
     const canvasEvent = getCanvasCursorPos( event );
+    const ctx = canvasDOM.getContext('2d');
 
     if( listenMovingCanvas ) {
         if( isMovingCanvas ) {
@@ -152,6 +168,9 @@ const onMouseMove = ( event: MouseEvent ): void => {
             }
             cwRender();
         }
+    } else if( isDrawingLine && ! isDragging && ! isResizing && dragCompIndex !== -1 && ctx ) {
+        cwRender();
+        drawLine( ctx, { start: lineStartPos, end: canvasEvent } );
     } else if( isDragging && ! isResizing && dragCompIndex !== -1 ) {
 
         // Drag component.
@@ -245,15 +264,47 @@ const onMouseMove = ( event: MouseEvent ): void => {
 /**
  * Mouse up event.
  */
-const onMouseUp = (): void => {
+const onMouseUp = ( event: MouseEvent ): void => {
+    const canvasEvent = getCanvasCursorPos( event );
+
     if ( isMovingCanvas ) {
         canvasDOM.style.cursor = 'grab';
+    }
+    if( isDrawingLine ) {
+        const revComponents = [ ...cwComponents ].reverse();
+        for( let comp of revComponents ) {
+            let compDimension = {
+                x: comp.x,
+                y: comp.y,
+                w: comp.w,
+                h: comp.h,
+            }
+    
+            if( rectCollision(canvasEvent.x, canvasEvent.y, compDimension ) ) {
+                const dropedIndex = reversedIndexOf( revComponents, comp );
+                if(  dropedIndex !== dragCompIndex ) {
+                    const startComp = cwComponents[dragCompIndex];
+
+                    if( startComp.options && startComp.options.length ) {
+                        const line: CanvasLine = {
+                            componentKey: startComp.key,
+                            optionKey: startComp.options[startDrawLineIndex].key,
+                            targetKey: cwComponents[dropedIndex].key,
+                        }
+                        cwLines.push( line );
+                    }
+                }
+                break;
+            }
+        }
     }
     isDragging = false;
     isResizing = false;
     isMovingCanvas = false;
+    isDrawingLine = false;
     tempComponents = [];
     canvasDOM.removeEventListener('mouseup', onMouseUp );
+    cwRender();
 }
 
 /**
