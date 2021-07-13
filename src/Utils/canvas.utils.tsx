@@ -258,6 +258,6 @@ const renderLine = ( line: CanvasLine ) => {
 const processBaseComponent = ( component: CanvasComponent ) => {
     // Register editor mode.
     if( cwMode === 'editor' && ctx ) {
-        drawLine( ctx, { start: {x: 10, y: 10 }, end: { x: 100, y: 10 } } )
+        // drawLine( ctx, { start: {x: 10, y: 10 }, end: { x: 100, y: 10 } } )
     }
 }
