@@ -15,7 +15,7 @@ import {
     TEXT_COLOR 
 } from "../Constants/canvas.constants";
 import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { formatBorderRadius, getLineAngle, getSelectionBoxCords, getDrawLineButtonCords } from "./common.utils";
+import { formatBorderRadius, getLineAngle, getSelectionBoxCords, getDrawLineButtonCords, reduceLineSize } from "./common.utils";
 
 /**
  * Draw Canvas Dot grid.
@@ -170,28 +170,45 @@ export const printAtWordWrap = ( ctx: CanvasRenderingContext2D , text: string, x
         ctx.fillText( words.join(' '), x, y + (lineHeight * currentLine) );
 }
 
-export const drawLine = ( ctx: CanvasRenderingContext2D, points: any, joints?: any[], tension = 1 ) => {
+export const drawLine = ( ctx: CanvasRenderingContext2D, points: any, joints?: any[], tension = 10 ) => {
     ctx.beginPath();
     ctx.moveTo( points.start.x, points.start.y );
+
+    let lastJoint: any;
     
+    if( joints && joints.length > 0 ) {
+        joints.forEach( (joint, index) => {
+            let p0 = { ...points.start };
+            let p2 = { ...points.end };
+
+            if( index > 0 ) {
+                p0 = { ...joints[index - 1] };
+            }
+            if( index < joints.length - 1 ) {
+                p2 = { ...joints[ index + 1 ] };
+            }
+
+            const fPoint0 = reduceLineSize( p0, joint, tension );
+            const fPoint1 = reduceLineSize( p2, joint, tension );
+
+            ctx.lineTo( fPoint0.x, fPoint0.y );
+            ctx.quadraticCurveTo( joint.x, joint.y, fPoint1.x, fPoint1.y );
+
+            if( joints.length - 1 == index ) {
+                lastJoint = joint;
+            }
+        } );
+    }
+
     ctx.lineTo( points.end.x, points.end.y );
-    // var t = (tension !== null) ? tension : 0;
-    // for (var i = 0; i < points.length - 1; i++) {
-    //     var p0 = (i > 0) ? points[i - 1] : points[0];
-    //     var p1 = points[i];
-    //     var p2 = points[i + 1];
-    //     var p3 = (i != points.length - 2) ? points[i + 2] : p2;
-
-    //     var cp1x = p1.x + (p2.x - p0.x) / 10 * t;
-    //     var cp1y = p1.y + (p2.y - p0.y) / 10 * t;
-
-    //     var cp2x = p2.x - (p3.x - p1.x) / 10 * t;
-    //     var cp2y = p2.y - (p3.y - p1.y) / 10 * t;
-
-    //     ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
-    // }
     ctx.stroke();
-    const angle = getLineAngle( points.start.x, points.start.y, points.end.x, points.end.y );
+
+    let angle = 0;
+    if( lastJoint ) {
+        angle = getLineAngle( lastJoint.x, lastJoint.y, points.end.x, points.end.y );
+    } else {
+        angle = getLineAngle( points.start.x, points.start.y, points.end.x, points.end.y );
+    }
     drawArrowHead( ctx, points.end.x, points.end.y, 7, angle, '#000' );
 }
 

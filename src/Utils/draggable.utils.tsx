@@ -169,6 +169,7 @@ const onMouseMove = ( event: MouseEvent ): void => {
             cwRender();
         }
     } else if( isDrawingLine && ! isDragging && ! isResizing && dragCompIndex !== -1 && ctx ) {
+        canvasDOM.style.cursor = 'grabbing';
         cwRender();
         drawLine( ctx, { start: lineStartPos, end: canvasEvent } );
     } else if( isDragging && ! isResizing && dragCompIndex !== -1 ) {
@@ -221,20 +222,23 @@ const onMouseMove = ( event: MouseEvent ): void => {
         cwRender();
     } else {
         canvasDOM.style.cursor = 'default';
+
+        if( dragCompIndex > -1 ) {
+            getDrawLineButtonCords( cwComponents[dragCompIndex] ).every( ( box ) => {
+                if( rectCollision(canvasEvent.x, canvasEvent.y, box ) ) {
+                    canvasDOM.style.cursor = 'grab';
+                    return false;
+                }
+                return true;
+            } );
+        }
+
         cwComponents.every( ( comp, index ) => {
             let compDimension = {
                 x: comp.x,
                 y: comp.y,
-                w: 0,
-                h: 0,
-            }
-    
-            switch( comp.type ) {
-                case 'box':
-                    const c = comp as BoxComponent;
-                    compDimension.w = c.w;
-                    compDimension.h = c.h;
-                    break;
+                w: comp.w,
+                h: comp.h,
             }
 
             if( rectCollision(canvasEvent.x, canvasEvent.y, compDimension ) ) {
@@ -271,6 +275,7 @@ const onMouseUp = ( event: MouseEvent ): void => {
         canvasDOM.style.cursor = 'grab';
     }
     if( isDrawingLine ) {
+        canvasDOM.style.cursor = 'grab';
         const revComponents = [ ...cwComponents ].reverse();
         for( let comp of revComponents ) {
             let compDimension = {
@@ -290,6 +295,7 @@ const onMouseUp = ( event: MouseEvent ): void => {
                             componentKey: startComp.key,
                             optionKey: startComp.options[startDrawLineIndex].key,
                             targetKey: cwComponents[dropedIndex].key,
+                            joints: [ {x: 100, y: 100} ]
                         }
                         cwLines.push( line );
                     }

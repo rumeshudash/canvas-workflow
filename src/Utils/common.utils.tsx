@@ -382,3 +382,9 @@ export const getOptionCoordsByKey = ( key: string, component?: CanvasComponent |
     }
     return null;
 }
+
+export const reduceLineSize = ( start: { x: number, y: number}, end: { x: number, y: number }, deduct: number ) => {
+    const length = Math.sqrt( Math.pow( start.x - end.x, 2 ) + Math.pow( start.y - end.y, 2 ) );
+    const t0 = 1 - deduct / length;
+    return { x: start.x + t0 * ( end.x - start.x ), y: start.y + t0 * ( end.y - start.y ) };
+}
