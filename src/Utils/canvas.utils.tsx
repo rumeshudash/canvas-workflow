@@ -213,10 +213,15 @@ const renderLine = ( line: CanvasLine ) => {
     const startOptionCoords = getOptionCoordsByKey( line.optionKey, startComp );
 
     if( ctx && startComp && endComp && startOptionCoords ) {
+        let lastJoints = null;
+        if( line.joints && line.joints.length > 0 ) {
+            lastJoints = line.joints[ line.joints.length - 1 ];
+        }
+
         let points = {
             start: {
-                x: startOptionCoords.x - 5,
-                y: startOptionCoords.y + (startOptionCoords.h / 2),
+                x: lastJoints ? lastJoints.x : startOptionCoords.x - 5,
+                y: lastJoints ? lastJoints.y : startOptionCoords.y + (startOptionCoords.h / 2),
             },
             end: { 
                 x: endComp.x,
@@ -225,29 +230,34 @@ const renderLine = ( line: CanvasLine ) => {
         }
 
         // When target goes right.
-        if( startOptionCoords.x + 50 < endComp.x ) {
+        if( points.start.x + 50 < endComp.x ) {
             points.end.y = endComp.y + (endComp.h / 2);
         }
         // When target goes left.
-        if( startOptionCoords.x > endComp.x ) {
+        if( points.start.x > endComp.x ) {
             points.end.x = endComp.x + (endComp.w / 2);
         }
         // When target goes fully left of box.
-        if( (startOptionCoords.x - startComp.w) > endComp.x ) {
+        if( (points.start.x - startComp.w) > endComp.x ) {
             points.end.x = endComp.x + endComp.w;
         }
         // When target goes fully above of box.
-        if( (startOptionCoords.y - ( startOptionCoords.y - startComp.y )) > (endComp.y + endComp.h) ) {
+        if( points.start.y > (endComp.y + endComp.h) ) {
             points.end.y = endComp.y + endComp.h;
         }
         // When target goes fully left of box.
-        if( (startOptionCoords.x - startComp.w) > (endComp.x + endComp.w) ) {
+        if( (points.start.x - startComp.w) > (endComp.x + endComp.w) ) {
             points.end.y = endComp.y + (endComp.h / 2);
         }
 
-        drawLine( ctx, points );
+        points.start = {
+            x: startOptionCoords.x - 5,
+            y: startOptionCoords.y + (startOptionCoords.h / 2),
+        };
+
+        drawLine( ctx, points, line.joints, 10 );
     }
-    // drawSelectionHandle( component, canvasData, selectedIndex, canvasDefaultData, cwMode, ctx );
+    // drawLineSelectionHandle( line, canvasData, selectedIndex, canvasDefaultData, cwMode, ctx );
 }
 
 /**
