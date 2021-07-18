@@ -264,10 +264,6 @@ export const getDefaultBoxData = ( x?: number, y?: number ) => {
                 key: getUniqueKey(),
                 name: 'Always',
             },
-            { 
-                key: getUniqueKey(),
-                name: 'Completed',
-            }
         ]
     };
 
@@ -378,7 +374,7 @@ export const getComponentByKey = ( key: string, components: CanvasComponent[] ) 
 
 export const getOptionCoordsByKey = ( key: string, component?: CanvasComponent | null ) => {
     if( component ) {
-        return getDrawLineButtonCords( component ).find( ( _, index ) => component.options && component.options[index].key === key );
+        return getDrawLineButtonCords( component ).reverse().find( ( _, index ) => component.options && component.options[index].key === key );
     }
     return null;
 }

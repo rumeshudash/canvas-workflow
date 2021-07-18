@@ -19,7 +19,8 @@ import {
 } from '../../Constants/canvas.constants';
 import { BoxComponent, CanvasComponent, CanvasData, Option } from '../../Dtos/canvas.dtos';
 import { canvasRender } from '../../Utils/canvas.utils';
-import { getAvailableFontList } from '../../Utils/common.utils';
+import { getAvailableFontList, getUniqueKey } from '../../Utils/common.utils';
+import { BsPlus, BsTrash } from "react-icons/bs";
 import Textarea from '../Inputs/Textarea/textarea.component';
 import NumberInput from '../Inputs/NumberInput/numberInput.component';
 import ColorPicker from '../Inputs/ColorPicker/colorPicker.component';
@@ -111,6 +112,43 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                     setComponent( data.components[selection] );
                     canvasRender();
                 }
+            }
+        }
+    }
+
+    const addNewOption = () => {
+        if( data.components && data.components[selection]?.options ) {
+            const newOption: Option = {
+                key: getUniqueKey(),
+                name: 'Always',
+            }
+            const newComponent = { ...data.components[selection] };
+            if( newComponent.options && newComponent.options.length > 0 ) {
+                newComponent.options.push( newOption );
+            } else {
+                newComponent.options = [ newOption ];
+            }
+            data.components[selection] = newComponent;
+            setComponent( data.components[selection] );
+            canvasRender();
+        }
+    }
+
+    const removeOption = ( index: number ) => {
+        const confirmation = window.confirm('Are you sure want to delete this option?');
+        
+        if( confirmation && data.components && data.components[selection]?.options ) {
+            const newComponent = { ...data.components[selection] };
+            if( newComponent.options && newComponent.options.length > 0 ) {
+                if( data.lines && data.lines.length > 0 ) {
+                    // Remove unused line.
+                    data.lines = data.lines.filter( line => newComponent.options && line.optionKey !== newComponent.options[index].key );
+                }
+
+                newComponent.options = newComponent.options.filter( (_, i) => i !== index );
+                data.components[selection] = newComponent;
+                setComponent( data.components[selection] );
+                canvasRender();
             }
         }
     }
@@ -275,13 +313,19 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                         </div>}
                     </Collapse>
                     <Collapse title='Options'>
-                        { comp?.options && comp.options.map( ( option: Option, index: number ) => (
-                            <div key={option.key} className='form-group'>
-                                <div className='form-control'>
-                                    <input type='text' defaultValue={option.name} onChange={ (e) => handleComponentOptionChange( index, 'name', e.target.value ) } />
+                        <div className='option-list'>
+                            { comp?.options && comp.options.map( ( option: Option, index: number ) => (
+                                <div key={option.key} className='form-group'>
+                                    <div className='form-control inline'>
+                                        <input className='full-width' type='text' defaultValue={option.name} onChange={ (e) => handleComponentOptionChange( index, 'name', e.target.value ) } />
+                                        <button className='btn-link btn-danger' onClick={ () => removeOption(index) }>
+                                            <BsTrash />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ) ) }
+                            ) ) }
+                        </div>
+                        <button className='btn-subtle btn-success' onClick={addNewOption}><BsPlus /> Add Option</button>
                     </Collapse>
                 </div>
             }
