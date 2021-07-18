@@ -1,12 +1,12 @@
 import { BOX_MIN_HEIGHT, BOX_MIN_WIDTH, OPTION_HEIGHT, SELECTION_RESIZE_BOX_CURSORS } from "../Constants/canvas.constants";
-import { BoxComponent, CanvasComponent, CanvasLine } from "../Dtos/canvas.dtos";
+import { CanvasComponent, CanvasData, CanvasLine } from "../Dtos/canvas.dtos";
 import { getDefaultBoxData, getDrawLineButtonCords, getSelectionBoxCords, getSnapCords, getSnapSize, log, reversedIndexOf } from "./common.utils";
 import { drawLine } from "./draw.utils";
 
 let cwRender: Function;
 let canvasDOM: HTMLCanvasElement;
 let cwComponents: CanvasComponent[];
-let cwLines: CanvasLine[];
+let cwData: CanvasData;
 let tempComponents: CanvasComponent[];
 
 let removeComponent: ( index: number ) => void;
@@ -33,9 +33,9 @@ let lineStartPos = {x: 0, y: 0};
  * @param components Component array
  * @param render Render function of canvas.
  */
-export const RegisterDraggable = ( canvas: HTMLCanvasElement, components: CanvasComponent[] = [], lines: CanvasLine[] = [], render: Function, RemoveComponent: ( index: number ) => void ): void => {
-    cwComponents = components;
-    cwLines = lines;
+export const RegisterDraggable = ( canvas: HTMLCanvasElement, canvasData: CanvasData, render: Function, RemoveComponent: ( index: number ) => void ): void => {
+    cwComponents = canvasData.components || [];
+    cwData = canvasData;
     canvasDOM = canvas;
     cwRender = render;
     removeComponent = RemoveComponent;
@@ -81,7 +81,7 @@ const onMouseDown = ( event: MouseEvent ): void => {
     if( ! isMovingCanvas && ! isDragging && !isDrawingLine && dragCompIndex > -1 ) {
 
         const arrowBoxes = getDrawLineButtonCords( cwComponents[dragCompIndex] );
-        arrowBoxes.every( ( box, index ) => {
+        arrowBoxes.reverse().every( ( box, index ) => {
             if( rectCollision(canvasEvent.x, canvasEvent.y, box ) ) {
                 lineStartPos.x = box.x - 5;
                 lineStartPos.y = box.y + ( OPTION_HEIGHT / 2 );
@@ -297,7 +297,11 @@ const onMouseUp = ( event: MouseEvent ): void => {
                             targetKey: cwComponents[dropedIndex].key,
                             joints: [ {x: 100, y: 100} ]
                         }
-                        cwLines.push( line );
+                        if( cwData.lines && cwData.lines.length ) {
+                            cwData.lines.push( line );
+                        } else {
+                            cwData.lines = [ line ];
+                        }
                     }
                 }
                 break;

@@ -66,6 +66,7 @@
   "dependencies": {
     "rc-slider": "^9.7.2",
     "react-animate-height": "^2.0.23",
-    "react-color": "^2.19.3"
+    "react-color": "^2.19.3",
+    "react-icons": "^4.2.0"
   }
 }

@@ -7,7 +7,7 @@
     background: $settingsBG;
     color: #efefef;
     overflow: auto;
-
+    font-size: 14px;
     .form-group {
         display: flex;
         .form-control {
@@ -36,6 +36,61 @@
             .rc-slider {
                 margin-bottom: 5px;
             }
+
+            .full-width {
+                flex: 1 1 auto;
+            }
+        }
+    }
+
+    button {
+        display: flex;
+        align-items: center;
+        border: none;
+        border-radius: 3px;
+        padding: 3px 5px;
+        transition: all .3s ease;
+        cursor: pointer;
+
+        &.btn-danger {
+            color: $dangerColor;
+            &:hover {
+                color: darken($dangerColor, 10);
+            }
+        }
+
+        &.btn-link {
+            background: transparent;
+        }
+
+        &.btn-subtle {
+            background: transparent;
+            &.btn-danger {
+                color: $dangerColor;
+                &:hover {
+                    background: darken($dangerColor, 5);
+                    color: #efefef;
+                }
+            }
+            &.btn-primary {
+                color: $primaryColor;
+                &:hover {
+                    background: darken($primaryColor, 5);
+                    color: #efefef;
+                }
+            }
+            &.btn-success {
+                color: $successColor;
+                &:hover {
+                    background: darken($successColor, 5);
+                    color: #efefef;
+                }
+            }
+        }
+
+        &.btn-lg {
+            font-size: 1rem;
+            padding: 5px 7px;
         }
     }
 }

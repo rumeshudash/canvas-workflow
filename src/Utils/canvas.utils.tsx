@@ -66,7 +66,7 @@ export const InitCanvas = (
     canvasRender( false );
 
     if( cwMode === 'editor' && canvasData ) {
-        RegisterDraggable( canvasDOM, canvasData.components, canvasData.lines, canvasRender, RemoveComponent );
+        RegisterDraggable( canvasDOM, canvasData, canvasRender, RemoveComponent );
     } else {
         DestroyDraggable();
     }
