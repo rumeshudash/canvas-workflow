@@ -12,10 +12,12 @@ import {
     OPTION_HEIGHT,
     SELECTION_BOX_OFFSET, 
     STROKE_COLOR, 
-    TEXT_COLOR 
+    TEXT_COLOR, 
+    LINE_HOVER_COLOR,
+    LINE_HOVER_WIDTH
 } from "../Constants/canvas.constants";
-import { BorderRadius, BoxComponent, CanvasComponent, CanvasData } from "../Dtos/canvas.dtos";
-import { formatBorderRadius, getLineAngle, getSelectionBoxCords, getDrawLineButtonCords, reduceLineSize } from "./common.utils";
+import { BorderRadius, BoxComponent, CanvasComponent, CanvasData, CanvasLine } from "../Dtos/canvas.dtos";
+import { formatBorderRadius, getLineAngle, getSelectionBoxCords, getDrawLineButtonCords, reduceLineSize, getLinePath } from "./common.utils";
 
 /**
  * Draw Canvas Dot grid.
@@ -127,6 +129,25 @@ export const drawSelectionHandle = ( component: CanvasComponent, canvasData: Can
 }
 
 /**
+ * Draw line selection border or indicator.
+ * 
+ * @param component Canvas Component
+ */
+ export const drawLineSelectionHandle = ( line: CanvasLine, canvasData: CanvasData, lineSelectedIndex: number, cwMode: 'editor' | 'viewer', ctx?: CanvasRenderingContext2D | null ) => {
+    if( 
+        ctx 
+        && cwMode === 'editor'
+        && lineSelectedIndex > -1 
+        && canvasData.lines?.length 
+        && lineSelectedIndex === canvasData.lines.indexOf(line) 
+    ) {
+        const linePath = getLinePath( line, canvasData.components );
+        drawLineHover( ctx, linePath, line.joints );
+        drawLine( ctx, linePath, line.joints );
+    }
+}
+
+/**
  * Draw Text/Word with word wrap.
  * 
  * @param ctx Context
@@ -172,6 +193,7 @@ export const printAtWordWrap = ( ctx: CanvasRenderingContext2D , text: string, x
 
 export const drawLine = ( ctx: CanvasRenderingContext2D, points: any, joints?: any[], tension = 10 ) => {
     ctx.beginPath();
+    ctx.save();
     ctx.moveTo( points.start.x, points.start.y );
 
     let lastJoint: any;
@@ -210,6 +232,46 @@ export const drawLine = ( ctx: CanvasRenderingContext2D, points: any, joints?: a
         angle = getLineAngle( points.start.x, points.start.y, points.end.x, points.end.y );
     }
     drawArrowHead( ctx, points.end.x, points.end.y, 7, angle, '#000' );
+    ctx.restore();
+}
+
+export const drawLineHover = ( ctx: CanvasRenderingContext2D, points: any, joints?: any[], tension = 10 ) => {
+    ctx.beginPath();
+    ctx.save();
+    ctx.moveTo( points.start.x, points.start.y );
+
+    let lastJoint: any;
+    
+    if( joints && joints.length > 0 ) {
+        joints.forEach( (joint, index) => {
+            let p0 = { ...points.start };
+            let p2 = { ...points.end };
+
+            if( index > 0 ) {
+                p0 = { ...joints[index - 1] };
+            }
+            if( index < joints.length - 1 ) {
+                p2 = { ...joints[ index + 1 ] };
+            }
+
+            const fPoint0 = reduceLineSize( p0, joint, tension );
+            const fPoint1 = reduceLineSize( p2, joint, tension );
+
+            ctx.lineTo( fPoint0.x, fPoint0.y );
+            ctx.quadraticCurveTo( joint.x, joint.y, fPoint1.x, fPoint1.y );
+
+            if( joints.length - 1 == index ) {
+                lastJoint = joint;
+            }
+        } );
+    }
+
+    ctx.strokeStyle = LINE_HOVER_COLOR;
+    ctx.lineWidth = LINE_HOVER_WIDTH;
+    ctx.lineCap = 'round';
+    ctx.lineTo( points.end.x, points.end.y );
+    ctx.stroke();
+    ctx.restore();
 }
 
 /**

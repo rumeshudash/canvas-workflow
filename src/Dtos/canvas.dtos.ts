@@ -58,3 +58,8 @@ export interface CanvasLine {
     targetKey: string;
     joints?: any[];
 }
+
+export interface Point {
+    x: number,
+    y: number,
+}

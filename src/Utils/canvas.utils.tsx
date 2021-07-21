@@ -1,8 +1,8 @@
 import { BoxComponent, CanvasComponent, CanvasData, CanvasLine } from "../Dtos/canvas.dtos";
-import { debounce, getComponentByKey, getDevicePixelRatio, getOptionCoordsByKey, log } from "./common.utils";
+import { debounce, getDevicePixelRatio, getLinePath, log } from "./common.utils";
 import { DestroyDraggable, RegisterDraggable } from "./draggable.utils";
 import { TimeLogger } from "./timeLogger.utils";
-import { drawBoxComponent, drawCanvasDotGrid, drawLine, drawSelectionHandle } from './draw.utils';
+import { drawBoxComponent, drawCanvasDotGrid, drawLine, drawLineSelectionHandle, drawSelectionHandle } from './draw.utils';
 import { CANVAS_BG, CANVAS_HEIGHT } from "../Constants/canvas.constants";
 
 let forceStopDebug = true;
@@ -21,6 +21,7 @@ let canvasDefaultData = {
 
 let canvasData: CanvasData = {}
 let selectedIndex: number;
+let lineSelectedIndex: number;
 
 interface InitCanvasProps {
     parent: HTMLDivElement,
@@ -72,6 +73,7 @@ export const InitCanvas = (
     }
     window.addEventListener( 'resize', debouncRender );
     canvasDOM.addEventListener( 'cwComponentSelected', handleComponentSelect );
+    canvasDOM.addEventListener( 'cwLineSelected', handleLineSelect );
 }
 
 /**
@@ -115,6 +117,13 @@ export const ClearCanvas = () => {
 const handleComponentSelect = ( event: CustomEvent ) => {
     if( selectedIndex !== event.detail.index ) {
         selectedIndex = event.detail.index;
+        canvasRender( false );
+    }
+}
+
+const handleLineSelect = ( event: CustomEvent ) => {
+    if( lineSelectedIndex !== event.detail.index ) {
+        lineSelectedIndex = event.detail.index;
         canvasRender( false );
     }
 }
@@ -208,56 +217,13 @@ const renderComponents = ( component: CanvasComponent ) => {
  * @param component Canvas Component
  */
 const renderLine = ( line: CanvasLine ) => {
-    const startComp = getComponentByKey( line.componentKey, canvasData.components || [] );
-    const endComp = getComponentByKey( line.targetKey, canvasData.components || [] );
-    const startOptionCoords = getOptionCoordsByKey( line.optionKey, startComp );
+    const linePath = getLinePath( line, canvasData.components );
 
-    if( ctx && startComp && endComp && startOptionCoords ) {
-        let lastJoints = null;
-        if( line.joints && line.joints.length > 0 ) {
-            lastJoints = line.joints[ line.joints.length - 1 ];
-        }
-
-        let points = {
-            start: {
-                x: lastJoints ? lastJoints.x : startOptionCoords.x - 5,
-                y: lastJoints ? lastJoints.y : startOptionCoords.y + (startOptionCoords.h / 2),
-            },
-            end: { 
-                x: endComp.x,
-                y: endComp.y,
-            }
-        }
-
-        // When target goes right.
-        if( points.start.x + 50 < endComp.x ) {
-            points.end.y = endComp.y + (endComp.h / 2);
-        }
-        // When target goes left.
-        if( points.start.x > endComp.x ) {
-            points.end.x = endComp.x + (endComp.w / 2);
-        }
-        // When target goes fully left of box.
-        if( (points.start.x - startComp.w) > endComp.x ) {
-            points.end.x = endComp.x + endComp.w;
-        }
-        // When target goes fully above of box.
-        if( points.start.y > (endComp.y + endComp.h) ) {
-            points.end.y = endComp.y + endComp.h;
-        }
-        // When target goes fully left of box.
-        if( (points.start.x - startComp.w) > (endComp.x + endComp.w) ) {
-            points.end.y = endComp.y + (endComp.h / 2);
-        }
-
-        points.start = {
-            x: startOptionCoords.x - 5,
-            y: startOptionCoords.y + (startOptionCoords.h / 2),
-        };
-
-        drawLine( ctx, points, line.joints, 10 );
+    if( ctx && linePath ) {
+        drawLine( ctx, linePath, line.joints, 10 );
     }
-    // drawLineSelectionHandle( line, canvasData, selectedIndex, canvasDefaultData, cwMode, ctx );
+    
+    drawLineSelectionHandle( line, canvasData, lineSelectedIndex, cwMode, ctx );
 }
 
 /**

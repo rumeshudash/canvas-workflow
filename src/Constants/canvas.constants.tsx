@@ -47,6 +47,8 @@ export const BORDER_RADIUS = 2;
 export const MAX_BORDER_RADIUS = 20;
 export const LINE_WIDTH = 1;
 export const MAX_LINE_WIDTH = 10;
+export const LINE_HOVER_COLOR = '#1cb2f5a0';
+export const LINE_HOVER_WIDTH = 7;
 
 export const OPTION_BG_COLOR = '#f9fad0';
 export const OPTION_FONT_SIZE = 12;
