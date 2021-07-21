@@ -1,7 +1,7 @@
 import { BOX_MIN_HEIGHT, BOX_MIN_WIDTH, OPTION_HEIGHT, SELECTION_RESIZE_BOX_CURSORS } from "../Constants/canvas.constants";
 import { CanvasComponent, CanvasData, CanvasLine } from "../Dtos/canvas.dtos";
-import { getDefaultBoxData, getDrawLineButtonCords, getSelectionBoxCords, getSnapCords, getSnapSize, log, reversedIndexOf } from "./common.utils";
-import { drawLine } from "./draw.utils";
+import { getDefaultBoxData, getDrawLineButtonCords, getLinePath, getSelectionBoxCords, getSnapCords, getSnapSize, linePointCollision, rectCollision, reversedIndexOf } from "./common.utils";
+import { drawLine, drawLineHover } from "./draw.utils";
 
 let cwRender: Function;
 let canvasDOM: HTMLCanvasElement;
@@ -16,8 +16,11 @@ let isResizing = false;
 let listenMovingCanvas = false;
 let isMovingCanvas = false;
 let isDrawingLine = false;
+let isMovingJoint = false;
+let isLineHover = false;
 
 let dragCompIndex = -1;
+let dragLineIndex = -1;
 let resizeBoxIndex = -1;
 let startDrawLineIndex = -1;
 
@@ -94,45 +97,60 @@ const onMouseDown = ( event: MouseEvent ): void => {
         } );
     }
 
-    const revComponents = [ ...cwComponents ].reverse();
-    // Loop each components for hit.
-    for( let comp of revComponents ) {
-        let compDimension = {
-            x: comp.x,
-            y: comp.y,
-            w: comp.w,
-            h: comp.h,
-        }
-
-        if( ! isDragging && rectCollision(canvasEvent.x, canvasEvent.y, compDimension ) ) {
-            isDragging = true;
-            dragCompIndex = reversedIndexOf( revComponents, comp );
-            offset.x = canvasEvent.x - comp.x;
-            offset.y = canvasEvent.y - comp.y;
-
-            canvasDOM.addEventListener('mouseup', onMouseUp );
-            break;
-        }
-
-        if( ! isResizing && dragCompIndex !== -1 ) {
-            const selectionBoxes = getSelectionBoxCords( compDimension );
-            // Loop each selection boxes for hit.
-            selectionBoxes.every( ( box, index ) => {
-                if( rectCollision(canvasEvent.x, canvasEvent.y, box ) ) {
-                    isResizing = true;
-                    prevCursorPos = { ...canvasEvent };
-                    resizePrevCompPos = { ...compDimension };
-                    resizeBoxIndex = index;
-
-                    canvasDOM.addEventListener('mouseup', onMouseUp );
-                    return false;
-                }
-
-                return true;
-            } )
-            // Break loop for components if resizing.
-            if( isResizing ) {
+    if( ! isMovingJoint && cwData.lines ) {
+        const revLines = [...cwData.lines].reverse();
+        for( let line of revLines ) {
+            const linePath = getLinePath( line, cwComponents );
+            if( linePath && linePointCollision( canvasEvent, linePath, line.joints ) ) {
+                dragLineIndex = reversedIndexOf( revLines, line );
+                isMovingJoint = true;
+                canvasDOM.addEventListener('mouseup', onMouseUp );
                 break;
+            }
+        }
+    }
+
+    if( ! isMovingJoint ) {
+        const revComponents = [ ...cwComponents ].reverse();
+        // Loop each components for hit.
+        for( let comp of revComponents ) {
+            let compDimension = {
+                x: comp.x,
+                y: comp.y,
+                w: comp.w,
+                h: comp.h,
+            }
+    
+            if( ! isDragging && rectCollision(canvasEvent.x, canvasEvent.y, compDimension ) ) {
+                isDragging = true;
+                dragCompIndex = reversedIndexOf( revComponents, comp );
+                offset.x = canvasEvent.x - comp.x;
+                offset.y = canvasEvent.y - comp.y;
+    
+                canvasDOM.addEventListener('mouseup', onMouseUp );
+                break;
+            }
+    
+            if( ! isResizing && dragCompIndex !== -1 ) {
+                const selectionBoxes = getSelectionBoxCords( compDimension );
+                // Loop each selection boxes for hit.
+                selectionBoxes.every( ( box, index ) => {
+                    if( rectCollision(canvasEvent.x, canvasEvent.y, box ) ) {
+                        isResizing = true;
+                        prevCursorPos = { ...canvasEvent };
+                        resizePrevCompPos = { ...compDimension };
+                        resizeBoxIndex = index;
+    
+                        canvasDOM.addEventListener('mouseup', onMouseUp );
+                        return false;
+                    }
+    
+                    return true;
+                } )
+                // Break loop for components if resizing.
+                if( isResizing ) {
+                    break;
+                }
             }
         }
     }
@@ -142,7 +160,13 @@ const onMouseDown = ( event: MouseEvent ): void => {
         resizeBoxIndex = -1;
         startDrawLineIndex = -1;
     }
+
+    if( ! isMovingJoint ) {
+        dragLineIndex = -1;
+    }
+    
     triggerComponentSelect();
+    triggerLineSelect();
 }
 
 /**
@@ -223,6 +247,34 @@ const onMouseMove = ( event: MouseEvent ): void => {
     } else {
         canvasDOM.style.cursor = 'default';
 
+        if( ctx && cwData.lines ) {
+
+            if( isLineHover ) {
+                cwRender( false );
+                isLineHover = false;
+            }
+
+            const revLines = [...cwData.lines].reverse();
+
+            revLines.every( line => {
+                const linePath = getLinePath( line, cwComponents );
+                const originalIndex = reversedIndexOf( revLines, line );
+
+                if( linePath &&  linePointCollision( canvasEvent, linePath, line.joints ) ) {
+                    canvasDOM.style.cursor = 'crosshair';
+
+                    if( originalIndex !== dragLineIndex ) {
+                        cwRender( false );
+                        drawLineHover( ctx, linePath, line.joints );
+                        drawLine( ctx, linePath, line.joints );
+                        isLineHover = true;
+                    }
+                    return false;
+                }
+                return true;
+            } )
+        }
+
         if( dragCompIndex > -1 ) {
             getDrawLineButtonCords( cwComponents[dragCompIndex] ).every( ( box ) => {
                 if( rectCollision(canvasEvent.x, canvasEvent.y, box ) ) {
@@ -295,7 +347,7 @@ const onMouseUp = ( event: MouseEvent ): void => {
                             componentKey: startComp.key,
                             optionKey: startComp.options[startDrawLineIndex].key,
                             targetKey: cwComponents[dropedIndex].key,
-                            joints: [ {x: 100, y: 100} ]
+                            joints: [],
                         }
                         if( cwData.lines && cwData.lines.length ) {
                             cwData.lines.push( line );
@@ -311,6 +363,7 @@ const onMouseUp = ( event: MouseEvent ): void => {
     isDragging = false;
     isResizing = false;
     isMovingCanvas = false;
+    isMovingJoint = false;
     isDrawingLine = false;
     tempComponents = [];
     canvasDOM.removeEventListener('mouseup', onMouseUp );
@@ -327,14 +380,27 @@ const onKeyDown = ( event: KeyboardEvent ): void => {
         event.preventDefault();
         canvasDOM.style.cursor = 'grab'
         listenMovingCanvas = true;
-    } if( ( event.key.toLowerCase() === 'delete' || event.key.toLowerCase() === 'backspace' ) && dragCompIndex !== -1 ) {
-        event.preventDefault();
-        const tempIndex = dragCompIndex;
-        dragCompIndex = -1;
-        setTimeout( () => {
-            removeComponent( tempIndex );
-            triggerComponentSelect();
-        }, 100 )
+    } if( ( event.key.toLowerCase() === 'delete' || event.key.toLowerCase() === 'backspace' ) ) {
+        if( dragLineIndex !== -1 ) {
+            // To-do Remove Line.
+
+            // event.preventDefault();
+            // const tempIndex = dragCompIndex;
+            // dragLineIndex = -1;
+            // setTimeout( () => {
+            //     // removeComponent( tempIndex );
+            //     triggerLineSelect();
+            // }, 100 )
+
+        } else if( dragCompIndex !== -1 ) {
+            event.preventDefault();
+            const tempIndex = dragCompIndex;
+            dragCompIndex = -1;
+            setTimeout( () => {
+                removeComponent( tempIndex );
+                triggerComponentSelect();
+            }, 100 )
+        }
     }
 }
 
@@ -385,26 +451,6 @@ const onDrop = ( event: any ) => {
 }
 
 /**
- * Rectangular collision detection.
- * 
- * @param x Cursor X.
- * @param y Cursor Y
- * @param rect Rectangle coords.
- * @returns boolean
- */
-const rectCollision = ( x: number, y: number, rect: { x: number, y: number, w: number, h: number } ): boolean => {
-    if(
-        x > rect.x
-        && y > rect.y
-        && x < ( rect.w + rect.x )
-        && y < ( rect.h + rect.y )
-    ) {
-        return true;
-    }
-    return false;
-}
-
-/**
  * Get cursor position in canvas.
  * 
  * @param event MouseEvent
@@ -430,14 +476,15 @@ const triggerComponentSelect = (): void => {
 }
 
 /**
- * Trigger component moving event. 'cwComponentMoving'
+ * Trigger line select event. 'cwLineSelected'
  */
-// const triggerComponentMoving = (): void => {
-//     if( canvasDOM ) {
-//         canvasDOM.dispatchEvent( new CustomEvent('cwComponentMoving', { 
-//             detail:  { 
-//                 components: cwComponents,
-//             }
-//         }) );
-//     }
-// }
+ const triggerLineSelect = (): void => {
+    if( canvasDOM ) {
+        canvasDOM.dispatchEvent( new CustomEvent('cwLineSelected', { 
+            detail:  { 
+                index: dragLineIndex, 
+                line: cwData.lines && cwData.lines[dragLineIndex] 
+            } 
+        }) );
+    }
+}

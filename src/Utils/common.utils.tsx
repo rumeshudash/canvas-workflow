@@ -1,5 +1,5 @@
 import { CANVAS_GRID_SIZE, OPTION_HEIGHT, SELECTION_BOX_OFFSET, SELECTION_RESIZE_BOX_SIZE } from "../Constants/canvas.constants";
-import { BorderRadius, BorderRadiusBase, BoxComponent, CanvasComponent } from "../Dtos/canvas.dtos";
+import { BorderRadius, BorderRadiusBase, BoxComponent, CanvasComponent, CanvasLine, Point } from "../Dtos/canvas.dtos";
 
 /**
  * Log tag.
@@ -161,9 +161,6 @@ export const getDevicePixelRatio = ( ctx: CanvasRenderingContext2D ) => {
     return dpr / bsr;
 };
 
-interface FontDetector {
-
-}
 // https://stackoverflow.com/a/3368855/9784022
 /**
  * JavaScript code to detect available availability of a
@@ -383,4 +380,105 @@ export const reduceLineSize = ( start: { x: number, y: number}, end: { x: number
     const length = Math.sqrt( Math.pow( start.x - end.x, 2 ) + Math.pow( start.y - end.y, 2 ) );
     const t0 = 1 - deduct / length;
     return { x: start.x + t0 * ( end.x - start.x ), y: start.y + t0 * ( end.y - start.y ) };
+}
+
+export const getLinePath = ( line: CanvasLine, components?: CanvasComponent[] ) => {
+    const startComp = getComponentByKey( line.componentKey, components || [] );
+    const endComp = getComponentByKey( line.targetKey, components || [] );
+    const startOptionCoords = getOptionCoordsByKey( line.optionKey, startComp );
+
+    let points: any = null;
+    let lastJoints: any = null;
+
+    if( startComp && endComp && startOptionCoords ) {
+        if( line.joints && line.joints.length > 0 ) {
+            lastJoints = line.joints[ line.joints.length - 1 ];
+        }
+
+        points = {
+            start: {
+                x: lastJoints ? lastJoints.x : startOptionCoords.x - 5,
+                y: lastJoints ? lastJoints.y : startOptionCoords.y + (startOptionCoords.h / 2),
+            },
+            end: { 
+                x: endComp.x,
+                y: endComp.y,
+            }
+        }
+
+        // When target goes right.
+        if( points.start.x + 50 < endComp.x ) {
+            points.end.y = endComp.y + (endComp.h / 2);
+        }
+        // When target goes left.
+        if( points.start.x > endComp.x ) {
+            points.end.x = endComp.x + (endComp.w / 2);
+        }
+        // When target goes fully left of box.
+        if( (points.start.x - startComp.w) > endComp.x ) {
+            points.end.x = endComp.x + endComp.w;
+        }
+        // When target goes fully above of box.
+        if( points.start.y > (endComp.y + endComp.h) ) {
+            points.end.y = endComp.y + endComp.h;
+        }
+        // When target goes fully left of box.
+        if( (points.start.x - startComp.w) > (endComp.x + endComp.w) ) {
+            points.end.y = endComp.y + (endComp.h / 2);
+        }
+
+        points.start = {
+            x: startOptionCoords.x - 5,
+            y: startOptionCoords.y + (startOptionCoords.h / 2),
+        };
+    }
+
+    return points;
+}
+
+/**
+ * Rectangular collision detection.
+ * 
+ * @param x Cursor X.
+ * @param y Cursor Y
+ * @param rect Rectangle coords.
+ * @returns boolean
+ */
+export const rectCollision = ( x: number, y: number, rect: { x: number, y: number, w: number, h: number } ): boolean => {
+    if(
+        x > rect.x
+        && y > rect.y
+        && x < ( rect.w + rect.x )
+        && y < ( rect.h + rect.y )
+    ) {
+        return true;
+    }
+    return false;
+}
+
+const dist = ( x1: number, y1: number, x2: number, y2: number ) =>  Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+
+export const linePointCollision = ( point: Point, linePath: { start: Point, end: Point }, joints?: Point[], buffer = 0.2 ) => {
+    let collided = false;
+    let linePoints = [ linePath.start ];
+
+    if( joints ) {
+        linePoints = linePoints.concat( joints );
+    }
+    linePoints.push( linePath.end );
+
+    for( let i = 1; i < linePoints.length; i++ ) {
+        let start = { ...linePoints[i - 1] };
+
+        const lineLen = dist( start.x, start.y, linePoints[i].x, linePoints[i].y );
+        const dist1 = dist( start.x, start.y, point.x, point.y );
+        const dist2 = dist( linePoints[i].x, linePoints[i].y, point.x, point.y );
+        
+        if( dist1 + dist2 >= lineLen - buffer && dist1 + dist2 <= lineLen + buffer ) {
+            collided = true;
+            break;
+        }
+    }
+
+    return collided;
 }

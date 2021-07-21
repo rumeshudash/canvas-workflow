@@ -2,12 +2,14 @@
 
 .cw-settings {
     display: block;
+    padding-bottom: 20px;
     width: 240px;
     min-height: 300px;
+    max-height: calc( 100vh - 20px );
     background: $settingsBG;
+    font-size: 14px;
     color: #efefef;
     overflow: auto;
-    font-size: 14px;
     .form-group {
         display: flex;
         .form-control {
