@@ -633,7 +633,10 @@ export const getLineJoints = (
 
         if (
             !endCompHelper.isOnRight(points.start) ||
-            endCompHelper.isOnRight(points.start, MIN_LINE_BEND_MARGIN)
+            endCompHelper.isOnRight(
+                points.start,
+                MIN_LINE_BEND_MARGIN - endComp.w / 2
+            )
         ) {
             // Component is on right
             if (endCompHelper.isOnRight(points.start)) {

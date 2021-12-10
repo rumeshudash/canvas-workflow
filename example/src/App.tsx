@@ -8,7 +8,7 @@ const App = () => {
     const [data, setData] = useState<CanvasData>({});
 
     useEffect(() => {
-        setData({ ...testData, height: window.innerHeight });
+        setData({ ...data, height: window.innerHeight });
         // eslint-disable-next-line
     }, []);
 
@@ -30,52 +30,52 @@ const App = () => {
 
 export default App;
 
-const testData = {
-    height: 821,
-    components: [
-        {
-            key: '1jjruil',
-            type: 'box',
-            title: 'Workflow',
-            description: 'Your workflow description here.',
-            x: 140,
-            y: 230,
-            w: 150,
-            h: 100,
-            lineWidth: 1,
-            fillColor: '#ffffff',
-            options: [
-                {
-                    key: '19p8484',
-                    name: 'Always'
-                }
-            ]
-        },
-        {
-            key: '1ixoywz',
-            type: 'box',
-            title: 'Workflow',
-            description: 'Your workflow description here.',
-            x: 440,
-            y: 90,
-            w: 150,
-            h: 100,
-            lineWidth: 1,
-            fillColor: '#ffffff',
-            options: [
-                {
-                    key: 'vdz7bb',
-                    name: 'Always'
-                }
-            ]
-        }
-    ],
-    lines: [
-        {
-            componentKey: '1jjruil',
-            optionKey: '19p8484',
-            targetKey: '1ixoywz',
-            joints: []
-        }
-    ]
-};
+// const testData = {
+//     height: 821,
+//     components: [
+//         {
+//             key: '1jjruil',
+//             type: 'box',
+//             title: 'Workflow',
+//             description: 'Your workflow description here.',
+//             x: 140,
+//             y: 230,
+//             w: 150,
+//             h: 100,
+//             lineWidth: 1,
+//             fillColor: '#ffffff',
+//             options: [
+//                 {
+//                     key: '19p8484',
+//                     name: 'Always'
+//                 }
+//             ]
+//         },
+//         {
+//             key: '1ixoywz',
+//             type: 'box',
+//             title: 'Workflow',
+//             description: 'Your workflow description here.',
+//             x: 440,
+//             y: 90,
+//             w: 150,
+//             h: 100,
+//             lineWidth: 1,
+//             fillColor: '#ffffff',
+//             options: [
+//                 {
+//                     key: 'vdz7bb',
+//                     name: 'Always'
+//                 }
+//             ]
+//         }
+//     ],
+//     lines: [
+//         {
+//             componentKey: '1jjruil',
+//             optionKey: '19p8484',
+//             targetKey: '1ixoywz',
+//             joints: []
+//         }
+//     ]
+// };
