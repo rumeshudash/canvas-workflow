@@ -1,4 +1,5 @@
 import {
+    BORDER_LINE_WIDTH,
     CANVAS_GRID_SIZE,
     LINE_BEND_TENSION,
     MIN_LINE_BEND_MARGIN,
@@ -422,7 +423,7 @@ export const getDefaultBoxData = (x?: number, y?: number) => {
         y: 100,
         w: 150,
         h: 100,
-        lineWidth: 1,
+        lineWidth: BORDER_LINE_WIDTH,
         fillColor: '#ffffff',
         options: [
             {

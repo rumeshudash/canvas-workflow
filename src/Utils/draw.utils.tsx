@@ -8,14 +8,16 @@ import {
     LINE_BEND_TENSION,
     LINE_HOVER_COLOR,
     LINE_HOVER_WIDTH,
-    LINE_WIDTH,
+    BORDER_LINE_WIDTH,
     OPTION_BG_COLOR,
     OPTION_FONT_SIZE,
     OPTION_HEIGHT,
     OPTION_TEXT_COLOR,
     SELECTION_BOX_OFFSET,
     STROKE_COLOR,
-    TEXT_COLOR
+    TEXT_COLOR,
+    LINE_ARROW_WIDTH,
+    LINE_ARROW_COLOR
 } from '../Constants/canvas.constants';
 import {
     BorderRadius,
@@ -274,6 +276,8 @@ export const drawLine = (
     ctx.beginPath();
     ctx.save();
     ctx.moveTo(points.start.x, points.start.y);
+    ctx.lineWidth = LINE_ARROW_WIDTH;
+    ctx.strokeStyle = LINE_ARROW_COLOR;
 
     let lastJoint: any;
 
@@ -320,7 +324,7 @@ export const drawLine = (
             points.end.y
         );
     }
-    drawArrowHead(ctx, points.end.x, points.end.y, 7, angle, '#000');
+    drawArrowHead(ctx, points.end.x, points.end.y, 7, angle, LINE_ARROW_COLOR);
     ctx.restore();
 };
 
@@ -468,7 +472,7 @@ export const drawBoxComponent = (
     }
 
     // Draw box stroke or border.
-    ctx.lineWidth = component.lineWidth || LINE_WIDTH;
+    ctx.lineWidth = component.lineWidth || BORDER_LINE_WIDTH;
     ctx.strokeStyle = component.strokeColor || STROKE_COLOR;
     ctx.stroke();
     ctx.clip('evenodd'); // Clip inner elements inside box.
