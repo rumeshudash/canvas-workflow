@@ -1,12 +1,12 @@
 export interface CanvasData {
-    height?: number,
-    background?: string,
-    selectionStrokeColor?: string,
-    selectionLineWidth?: number,
-    showGrid?: boolean,
-    gridColor?: string,
-    components?: CanvasComponent[],
-    lines?: CanvasLine[],
+    height?: number;
+    background?: string;
+    selectionStrokeColor?: string;
+    selectionLineWidth?: number;
+    showGrid?: boolean;
+    gridColor?: string;
+    components?: CanvasComponent[];
+    lines?: CanvasLine[];
 }
 
 export type CanvasComponent = BoxComponent;
@@ -23,6 +23,7 @@ export interface BaseComponent {
     strokeColor?: string;
     draggable?: boolean;
     options?: Option[];
+    icon?: string;
 }
 
 export interface BoxComponent extends BaseComponent {
@@ -34,17 +35,15 @@ export interface BoxComponent extends BaseComponent {
     borderRadius?: BorderRadius;
 }
 
-export interface DiamondComponent extends BaseComponent {
-
-}
+export interface DiamondComponent extends BaseComponent {}
 
 export type BorderRadius = number | BorderRadiusBase;
 
-export interface BorderRadiusBase { 
-    tl: number; 
-    tr: number; 
-    br: number; 
-    bl: number 
+export interface BorderRadiusBase {
+    tl: number;
+    tr: number;
+    br: number;
+    bl: number;
 }
 
 export interface Option {
@@ -60,6 +59,12 @@ export interface CanvasLine {
 }
 
 export interface Point {
-    x: number,
-    y: number,
+    x: number;
+    y: number;
+}
+
+export interface SelectOption {
+    key?: string;
+    label: any;
+    value: string;
 }

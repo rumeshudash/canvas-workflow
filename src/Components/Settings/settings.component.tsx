@@ -1,21 +1,24 @@
 import React, { useEffect, useReducer, useState } from 'react';
+import { BsPlus, BsTrash } from 'react-icons/bs';
+import Select from 'react-select';
 import {
+    BORDER_LINE_WIDTH,
+    BORDER_RADIUS,
     CANVAS_BG,
     CANVAS_COLOR_LIST,
+    CANVAS_GRID_COLOR,
     CANVAS_HEIGHT,
+    DEFAULT_BOX_ICON,
+    DEFAULT_SHOW_GRID,
     FONT_FAMILY,
     FONT_SIZE,
+    MAX_BORDER_RADIUS,
+    MAX_FONT_SIZE,
+    MAX_LINE_WIDTH,
     MIN_CANVAS_HEIGHT,
     MIN_FONT_SIZE,
-    MAX_FONT_SIZE,
     STROKE_COLOR,
-    TEXT_COLOR,
-    BORDER_RADIUS,
-    MAX_BORDER_RADIUS,
-    BORDER_LINE_WIDTH,
-    MAX_LINE_WIDTH,
-    DEFAULT_SHOW_GRID,
-    CANVAS_GRID_COLOR
+    TEXT_COLOR
 } from '../../Constants/canvas.constants';
 import {
     BoxComponent,
@@ -24,13 +27,17 @@ import {
     Option
 } from '../../Dtos/canvas.dtos';
 import { canvasRender } from '../../Utils/canvas.utils';
-import { getAvailableFontList, getUniqueKey } from '../../Utils/common.utils';
-import { BsPlus, BsTrash } from 'react-icons/bs';
-import Textarea from '../Inputs/Textarea/textarea.component';
-import NumberInput from '../Inputs/NumberInput/numberInput.component';
-import ColorPicker from '../Inputs/ColorPicker/colorPicker.component';
-import SliderInput from '../Inputs/SliderInput/sliderInput.component';
+import {
+    getAvailableFontList,
+    getFAIcons,
+    getSelectedIcon,
+    getUniqueKey
+} from '../../Utils/common.utils';
 import Collapse from '../Collapse/collapse.component';
+import ColorPicker from '../Inputs/ColorPicker/colorPicker.component';
+import NumberInput from '../Inputs/NumberInput/numberInput.component';
+import SliderInput from '../Inputs/SliderInput/sliderInput.component';
+import Textarea from '../Inputs/Textarea/textarea.component';
 import './settings.component.scss';
 
 interface SettingsProps {
@@ -43,6 +50,8 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
     const [component, setComponent] = useState<CanvasComponent>();
     const [fonts, setFonts] = useState<string[]>([]);
     const [, forceUpdate] = useReducer((x) => x + 1, 0);
+
+    const fAIcons = getFAIcons();
 
     useEffect(() => {
         // List of available fonts.
@@ -181,6 +190,18 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                 canvasRender();
             }
         }
+    };
+
+    const reactSelectStyles = {
+        control: (provided: {}) => ({
+            ...provided,
+            border: '1px solid black',
+            borderRadius: 0
+        }),
+        option: (provided: {}, state: any) => ({
+            ...provided,
+            color: state.isSelected ? 'white' : 'black'
+        })
     };
 
     return (
@@ -392,6 +413,42 @@ const Settings = ({ data = {}, canvasRef }: SettingsProps) => {
                                                     value
                                                 )
                                             }
+                                        />
+                                    </div>
+                                </div>
+                                <div className='form-group'>
+                                    <div className='form-control'>
+                                        <label>Icon:</label>
+                                        <Select
+                                            defaultValue={getSelectedIcon(
+                                                fAIcons,
+                                                comp.icon || DEFAULT_BOX_ICON
+                                            )}
+                                            onChange={(selected) =>
+                                                handleComponentDataChange(
+                                                    'icon',
+                                                    selected?.key ||
+                                                        DEFAULT_BOX_ICON
+                                                )
+                                            }
+                                            options={fAIcons}
+                                            isSearchable
+                                            formatOptionLabel={(data) => {
+                                                return (
+                                                    <span
+                                                        style={{
+                                                            textTransform:
+                                                                'capitalize'
+                                                        }}
+                                                    >
+                                                        <i className='far'>
+                                                            {data.key}
+                                                        </i>{' '}
+                                                        {data.label}
+                                                    </span>
+                                                );
+                                            }}
+                                            styles={reactSelectStyles}
                                         />
                                     </div>
                                 </div>

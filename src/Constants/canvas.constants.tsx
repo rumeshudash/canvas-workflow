@@ -1,3 +1,5 @@
+import { BELL_REGULAR_ICON } from './fontAwesomeIcon.constants';
+
 export const CANVAS_HEIGHT = 500;
 export const MIN_CANVAS_HEIGHT = 250;
 export const CANVAS_GRID_SIZE = 10;
@@ -58,3 +60,6 @@ export const OPTION_BG_COLOR = '#f9fad0';
 export const OPTION_FONT_SIZE = 12;
 export const OPTION_HEIGHT = 20;
 export const OPTION_TEXT_COLOR = '#000000';
+
+export const DEFAULT_BOX_ICON = BELL_REGULAR_ICON;
+export const DEFAULT_ICON_SIZE = 14;

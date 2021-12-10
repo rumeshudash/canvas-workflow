@@ -1,19 +1,22 @@
 import {
     BORDER_LINE_WIDTH,
     CANVAS_GRID_SIZE,
+    DEFAULT_BOX_ICON,
     LINE_BEND_TENSION,
     MIN_LINE_BEND_MARGIN,
     OPTION_HEIGHT,
     SELECTION_BOX_OFFSET,
     SELECTION_RESIZE_BOX_SIZE
 } from '../Constants/canvas.constants';
+import * as FAIcons from '../Constants/fontAwesomeIcon.constants';
 import {
     BorderRadius,
     BorderRadiusBase,
     BoxComponent,
     CanvasComponent,
     CanvasLine,
-    Point
+    Point,
+    SelectOption
 } from '../Dtos/canvas.dtos';
 import { ComponentHelper } from './componentHelper';
 
@@ -404,6 +407,35 @@ export const getAvailableFontList = (): string[] => {
     return availableList;
 };
 
+// Get FontAwesome Icons List from 'fontAwesomeIcon.constants.tsx'.
+export const getFAIcons = (): SelectOption[] => {
+    let icons: SelectOption[] = [];
+    let faIconList = Object.keys(FAIcons);
+    faIconList.sort().map((icon) => {
+        if (icon.indexOf('_REGULAR_ICON') > -1) {
+            icons.push({
+                label: icon
+                    .replace('_REGULAR_ICON', '')
+                    .replaceAll('_', ' ')
+                    .toLowerCase(),
+                key: FAIcons[icon],
+                value: icon
+            });
+        }
+    });
+
+    return icons;
+};
+
+// Get icon option for select box(react-select).
+export const getSelectedIcon = (options: SelectOption[], value: string) => {
+    const currentIcon = options.filter((icon) => icon.key === value);
+    if (currentIcon.length > 0) {
+        return currentIcon[0];
+    }
+    return null;
+};
+
 /**
  * Custom Log with tag.
  *
@@ -419,6 +451,7 @@ export const getDefaultBoxData = (x?: number, y?: number) => {
         type: 'box',
         title: 'Workflow',
         description: 'Your workflow description here.',
+        icon: DEFAULT_BOX_ICON,
         x: 100,
         y: 100,
         w: 150,

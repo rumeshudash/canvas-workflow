@@ -1,24 +1,26 @@
 import {
+    BORDER_LINE_WIDTH,
     BORDER_RADIUS,
     CANVAS_GRID_COLOR,
     CANVAS_GRID_SIZE,
+    DEFAULT_ICON_SIZE,
     DEFAULT_SHOW_GRID,
     FONT_FAMILY,
     FONT_SIZE,
+    LINE_ARROW_COLOR,
+    LINE_ARROW_WIDTH,
     LINE_BEND_TENSION,
     LINE_HOVER_COLOR,
     LINE_HOVER_WIDTH,
-    BORDER_LINE_WIDTH,
     OPTION_BG_COLOR,
     OPTION_FONT_SIZE,
     OPTION_HEIGHT,
     OPTION_TEXT_COLOR,
     SELECTION_BOX_OFFSET,
     STROKE_COLOR,
-    TEXT_COLOR,
-    LINE_ARROW_WIDTH,
-    LINE_ARROW_COLOR
+    TEXT_COLOR
 } from '../Constants/canvas.constants';
+import { PENCIL_ALT_ICON } from '../Constants/fontAwesomeIcon.constants';
 import {
     BorderRadius,
     BoxComponent,
@@ -177,12 +179,16 @@ export const drawSelectionHandle = (
 
         const drawArrowBoxes = getDrawLineButtonCords(component);
         for (let arrowBox of drawArrowBoxes) {
-            ctx.drawImage(
-                document.getElementById('arrowLineIcon') as any,
-                arrowBox.x,
-                arrowBox.y,
-                arrowBox.w,
-                arrowBox.h
+            drawFontAwesomeIcon(
+                ctx,
+                PENCIL_ALT_ICON,
+                {
+                    x: arrowBox.x,
+                    y: arrowBox.y
+                },
+                DEFAULT_ICON_SIZE,
+                null,
+                'solid'
             );
         }
 
@@ -467,7 +473,7 @@ export const drawBoxComponent = (
 
     if (component.fillColor) {
         // Draw box fill
-        ctx.fillStyle = component.fillColor || 'transparent';
+        ctx.fillStyle = component.fillColor;
         ctx.fill();
     }
 
@@ -477,13 +483,26 @@ export const drawBoxComponent = (
     ctx.stroke();
     ctx.clip('evenodd'); // Clip inner elements inside box.
 
+    if (component.icon) {
+        drawFontAwesomeIcon(
+            ctx,
+            component.icon,
+            {
+                x: component.x + padding + ctx.lineWidth,
+                y: component.y + padding
+            },
+            16,
+            component.textColor || TEXT_COLOR
+        );
+    }
+
     // Draw box text.
     ctx.font = `bold ${fontSize}px ${component.fontFamily || FONT_FAMILY}`;
     ctx.fillStyle = component.textColor || TEXT_COLOR;
     ctx.fillText(
         component.title,
-        component.x + padding + ctx.lineWidth,
-        component.y + padding + fontSize + ctx.lineWidth - 5
+        component.x + padding + ctx.lineWidth + DEFAULT_ICON_SIZE + padding,
+        component.y + padding * 2 + fontSize + ctx.lineWidth - 5
     );
 
     if (component.description) {
@@ -492,7 +511,7 @@ export const drawBoxComponent = (
             ctx,
             component.description,
             component.x + padding + ctx.lineWidth,
-            component.y + padding * 2 + fontSize * 2 + ctx.lineWidth - 5,
+            component.y + padding * 3 + fontSize * 2 + ctx.lineWidth - 5,
             fontSize,
             component.w - padding * 2 - ctx.lineWidth
         );
@@ -534,4 +553,34 @@ export const drawBoxComponent = (
     }
 
     ctx.restore(); // Restore default state.
+};
+
+/**
+ * Draws Font awesome icon in canvas.
+ *
+ * @param ctx Canvas Context 2D
+ * @param point Point
+ * @param color string
+ * @param size number
+ */
+export const drawFontAwesomeIcon = (
+    ctx: CanvasRenderingContext2D | null,
+    icon: string,
+
+    point: Point = { x: 0, y: 0 },
+    size: number = DEFAULT_ICON_SIZE,
+    color?: string | null,
+    type: 'regular' | 'solid' = 'regular'
+) => {
+    let fontWeight = '400';
+    if (type === 'solid') {
+        fontWeight = '900';
+    }
+    if (ctx) {
+        ctx.font = `${fontWeight} ${size}px "Font Awesome 5 Free"`;
+        if (color) {
+            ctx.fillStyle = color;
+        }
+        ctx.fillText(icon, point.x, point.y + size);
+    }
 };

@@ -176,17 +176,17 @@ export const canvasRender = (triggerDataChange = true) => {
         // Draw canvas grid.
         drawCanvasDotGrid(canvasData, canvasDOM, ctx);
 
-        // Render components.
-        if (canvasData?.components) {
-            canvasData.components.forEach((component) => {
-                renderComponents(component);
-            });
-        }
-
         // Render lines.
         if (canvasData?.lines) {
             canvasData.lines.forEach((line) => {
                 renderLine(line);
+            });
+        }
+
+        // Render components.
+        if (canvasData?.components) {
+            canvasData.components.forEach((component) => {
+                renderComponents(component);
             });
         }
 
